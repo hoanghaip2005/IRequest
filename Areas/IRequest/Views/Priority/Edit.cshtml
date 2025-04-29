@@ -1,0 +1,60 @@
+@model App.Models.IRequest.Priority
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<div class="container-fluid">
+    <div class="row mt-4" style="font-size: 1.2rem;">
+        <div class="mx-3">
+            <span>Home</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["controller"]</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["action"]</span>
+        </div>
+    </div>
+    <div class="row md-4"></div>
+        <h1 class="p-3 mt-0">@ViewData["Title"]</h1>
+    </div>
+    <div class="row md-4 mx-3">
+        <div class="col-md-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="PriorityID" />
+                <div class="form-group">
+                    <label asp-for="PriorityName" class="control-label"></label>
+                    <input asp-for="PriorityName" class="form-control" />
+                    <span asp-validation-for="PriorityName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ResolutionTime" class="control-label"></label>
+                    <input asp-for="ResolutionTime" class="form-control" />
+                    <span asp-validation-for="ResolutionTime" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ResponseTime" class="control-label"></label>
+                    <input asp-for="ResponseTime" class="form-control" />
+                    <span asp-validation-for="ResponseTime" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                    </label>
+                </div>
+                <div class="form-group mt-2">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+        <div class="mt-2">
+            <a asp-action="Index" class="text-decoration-none btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+
+

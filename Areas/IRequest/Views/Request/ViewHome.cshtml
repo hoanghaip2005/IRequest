@@ -1,0 +1,107 @@
+@model IEnumerable<App.Models.IRequest.Request>
+
+@{
+    ViewData["Title"] = "Trang Chủ";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<div class="container-fluid">
+    <h1 class="mb-4">Request List</h1>
+
+    <div class="mb-4">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Board</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Calendar</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Search...">
+        </div>
+        <div class="col-md-3">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Status
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                    <li><a class="dropdown-item" href="#">Open</a></li>
+                    <li><a class="dropdown-item" href="#">In Progress</a></li>
+                    <li><a class="dropdown-item" href="#">Closed</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="requestTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Request Type
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="requestTypeDropdown">
+                    <li><a class="dropdown-item" href="#">Bug</a></li>
+                    <li><a class="dropdown-item" href="#">Feature</a></li>
+                    <li><a class="dropdown-item" href="#">Task</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>To Do (@Model.Count(r => r.Status?.StatusName == "To Do"))</h4>
+            @foreach (var request in Model.Where(r => r.Status?.StatusName == "To Do"))
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">@request.Title</h5>
+                        <p class="card-text">
+                            <strong>Status:</strong> @request.Status?.StatusName<br />
+                            <strong>Created At:</strong> @request.CreatedAt.ToString("dd/MM/yyyy")<br />
+                            <strong>Request ID:</strong> EFR-@request.RequestID.ToString("D6")
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-4">
+            <h4>In Progress (@Model.Count(r => r.Status?.StatusName == "In Progress"))</h4>
+            @foreach (var request in Model.Where(r => r.Status?.StatusName == "In Progress"))
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">@request.Title</h5>
+                        <p class="card-text">
+                            <strong>Status:</strong> @request.Status?.StatusName<br />
+                            <strong>Created At:</strong> @request.CreatedAt.ToString("dd/MM/yyyy")<br />
+                            <strong>Request ID:</strong> EFR-@request.RequestID.ToString("D6")
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-4">
+            <h4>Done (@Model.Count(r => r.Status?.StatusName == "Done"))</h4>
+            @foreach (var request in Model.Where(r => r.Status?.StatusName == "Done"))
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">@request.Title</h5>
+                        <p class="card-text">
+                            <strong>Status:</strong> @request.Status?.StatusName<br />
+                            <strong>Created At:</strong> @request.CreatedAt.ToString("dd/MM/yyyy")<br />
+                            <strong>Request ID:</strong> EFR-@request.RequestID.ToString("D6")
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

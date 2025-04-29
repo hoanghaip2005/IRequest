@@ -1,0 +1,217 @@
+is_global = true
+build_property.TargetFramework = net9.0
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = App
+build_property.RootNamespace = App
+build_property.ProjectDir = C:\Workspace\C#\Request\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Workspace\C#\Request
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Workspace/C\#/Request/Areas/Database/Views/DbManage/DeleteDb.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRGF0YWJhc2VcVmlld3NcRGJNYW5hZ2VcRGVsZXRlRGIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/Database/Views/DbManage/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRGF0YWJhc2VcVmlld3NcRGJNYW5hZ2VcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/Database/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRGF0YWJhc2VcVmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/Database/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRGF0YWJhc2VcVmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Department/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcRGVwYXJ0bWVudFxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Department/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcRGVwYXJ0bWVudFxEZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Department/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcRGVwYXJ0bWVudFxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Department/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcRGVwYXJ0bWVudFxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Department/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcRGVwYXJ0bWVudFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Priority/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUHJpb3JpdHlcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Priority/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUHJpb3JpdHlcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Priority/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUHJpb3JpdHlcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Priority/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUHJpb3JpdHlcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Priority/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUHJpb3JpdHlcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxEZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/ViewHome.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxWaWV3SG9tZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Status/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcU3RhdHVzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Status/DeleteStatus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcU3RhdHVzXERlbGV0ZVN0YXR1cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Status/DetailStatus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcU3RhdHVzXERldGFpbFN0YXR1cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Status/EditStatus.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcU3RhdHVzXEVkaXRTdGF0dXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Status/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcU3RhdHVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/WorkflowStep/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dTdGVwXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/WorkflowStep/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dTdGVwXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/WorkflowStep/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dTdGVwXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/WorkflowStep/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dTdGVwXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/WorkflowStep/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dTdGVwXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Workflow/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Workflow/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Workflow/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Workflow/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Workflow/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcV29ya2Zsb3dcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/_TagHomePage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcX1RhZ0hvbWVQYWdlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Shared/_AlertMessage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BbGVydE1lc3NhZ2UuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Shared/_MenuManagePartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9NZW51TWFuYWdlUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 

@@ -1,0 +1,137 @@
+@model IEnumerable<App.Models.IRequest.Workflow>
+
+@{
+    ViewData["Title"] = "Danh Sách Quản Lý Quy Trình Yêu Cầu";
+}
+
+<div class="container-fluid">
+    <partial name="~/Areas/IRequest/Views/_TagHomePage.cshtml" />
+    <div class="row mb-4">
+        <div>
+            <form method="get" asp-action="Index" class="row mb-4 align-items-center">
+                <div class="col-md-1">
+                    <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm..." value="@ViewData["searchString"]">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                </div>
+                <div class="col-md-1">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Quy trình
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                            <li><a class="dropdown-item" href="#">Mở</a></li>
+                            <li><a class="dropdown-item" href="#">Đang xử lý</a></li>
+                            <li><a class="dropdown-item" href="#">Đã đóng</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="requestTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Độ ưu tiên
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="requestTypeDropdown">
+                            <li><a class="dropdown-item" href="#">Lỗi</a></li>
+                            <li><a class="dropdown-item" href="#">Tính năng</a></li>
+                            <li><a class="dropdown-item" href="#">Nhiệm vụ</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all" />
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WorkflowID)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WorkflowName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Priority)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+        @foreach (var item in Model) {
+                <tr>
+                    <td>
+                        <input type="checkbox" class="row-checkbox" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.WorkflowID)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.WorkflowName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Priority.PriorityName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsActive)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.WorkflowID" class="btn btn-warning btn-sm text-white ">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.WorkflowID" class="btn btn-info btn-sm text-white ">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.WorkflowID" class="btn btn-danger btn-sm text-white ">Delete</a>
+                    </td>
+                </tr>
+        }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectAllCheckbox = document.getElementById('select-all');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+
+        selectAllCheckbox.addEventListener('change', function () {
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+                const row = checkbox.closest('tr');
+                if (selectAllCheckbox.checked) {
+                    row.classList.add('table-success');
+                } else {
+                    row.classList.remove('table-success');
+                }
+            });
+        });
+
+        rowCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const row = this.closest('tr');
+                if (this.checked) {
+                    row.classList.add('table-success');
+                } else {
+                    row.classList.remove('table-success');
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .table-success {
+        background-color: #d4edda !important;
+    }
+</style>

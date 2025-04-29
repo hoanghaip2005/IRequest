@@ -1,0 +1,22 @@
+<div class="row mt-4" style="font-size: 1.2rem;">
+    <div class="mx-2">
+        <span>Home</span>
+        <span> / </span>
+        <span>@ViewContext.RouteData.Values["controller"]</span>
+        <span> / </span>
+        <span>@ViewContext.RouteData.Values["action"]</span>
+    </div>
+</div>
+<div class="row">
+    <h1 class="p-3 mt-0">@ViewData["Title"]</h1>
+</div>
+<div class="row mb-4">
+    <div class="col-md-12 d-flex justify-content-start">
+        <button class="btn btn-primary mb-3">
+            <a asp-action="Create" class="text-decoration-none text-light">Tạo mới</a>
+        </button>
+    </div>
+</div>
+<div class="row mb-4">
+    <span class="text-muted">@Model.Count Work Items</span>
+</div>

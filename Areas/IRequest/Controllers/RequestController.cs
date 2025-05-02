@@ -9,6 +9,7 @@ using App.Models;
 using RequestModel = App.Models.IRequest.Request;
 using App.Models.IRequest;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Request.Areas.IRequest.Controllers
 {
@@ -17,10 +18,13 @@ namespace Request.Areas.IRequest.Controllers
     public class RequestController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
-        public RequestController(AppDbContext context)
+        public RequestController(AppDbContext context, UserManager<AppUser> userManager)
         {
+            _userManager = userManager;
             _context = context;
+
         }
 
         [HttpGet("/request/home")]
@@ -56,7 +60,7 @@ namespace Request.Areas.IRequest.Controllers
 
             return View(request);
         }
-       [TempData]
+        [TempData]
         public string? StatusMessage { set; get; }
 
         [HttpGet("/request/create")]
@@ -74,18 +78,75 @@ namespace Request.Areas.IRequest.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("RequestID,Title,Description,AttachmentURL,IsApproved,StatusID,PriorityID,WorkflowID")] RequestModel request)
         {
+            // if (ModelState.IsValid)
+            // {
+            //     var user = _userManager.GetUserId(User);  // Lấy thông tin người dùng đã đăng nhập
+            //     string userId = user; // Gán UserId từ bảng Users
+
+            //     // Gán UserId vào đối tượng request
+            //     request.UsersId = userId;
+            //     if (!User.IsInRole("Admin") && !User.IsInRole("Member"))
+            //     {
+            //         // Nếu không phải Admin hoặc Member, gán giá trị mặc định cho PriorityID, StatusID, và WorkflowID
+            //         request.PriorityID = 1; // Gán ID mặc định (thay thế bằng giá trị hợp lý)
+            //         request.StatusID = 1; // Gán ID mặc định (thay thế bằng giá trị hợp lý)
+            //         request.WorkflowID = 1; // Gán ID mặc định (thay thế bằng giá trị hợp lý)
+            //     }
+            //     request.CreatedAt = DateTime.UtcNow;
+            //     request.UpdatedAt = DateTime.UtcNow;
+            //     _context.Add(request);
+            //     await _context.SaveChangesAsync();
+            //     TempData["StatusMessage"] = "Tạo mới trạng thái thành công.";
+            //     return RedirectToAction("Index", "Home");
+            // }
+            // ViewData["PriorityID"] = new SelectList(_context.Set<Priority>(), "PriorityID", "Description", request.PriorityID);
+            // ViewData["StatusID"] = new SelectList(_context.Set<Status>(), "StatusID", "StatusName", request.StatusID);
+            // ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName", request.WorkflowID);
+            // return View(request);
+
             if (ModelState.IsValid)
             {
+                // Lấy thông tin người dùng đã đăng nhập
+                var user = await _userManager.GetUserAsync(User);  // Lấy thông tin người dùng đã đăng nhập
+                string userId = user?.Id; // Lấy UserId từ bảng Users
+
+                // Nếu người dùng không tồn tại (chưa đăng nhập), có thể redirect đến trang đăng nhập
+                if (userId == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy người dùng. Vui lòng đăng nhập.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                // Gán UserId vào đối tượng Request
+                request.UsersId = userId;
+
+                // Kiểm tra vai trò của người dùng và gán giá trị mặc định cho PriorityID, StatusID, và WorkflowID nếu không phải Admin hoặc Member
+                if (!User.IsInRole("Admin") && !User.IsInRole("Member"))
+                {
+                    // Gán ID mặc định cho các trường Priority, Status, Workflow
+                    request.PriorityID = 1; // Gán ID mặc định (thay thế bằng giá trị hợp lý)
+                    request.StatusID = 1;   // Gán ID mặc định (thay thế bằng giá trị hợp lý)
+                    request.WorkflowID = 1; // Gán ID mặc định (thay thế bằng giá trị hợp lý)
+                }
+
+                // Cập nhật thời gian tạo và cập nhật
                 request.CreatedAt = DateTime.UtcNow;
                 request.UpdatedAt = DateTime.UtcNow;
+
+                // Thêm yêu cầu vào context và lưu vào cơ sở dữ liệu
                 _context.Add(request);
                 await _context.SaveChangesAsync();
-                TempData["StatusMessage"] = "Tạo mới trạng thái thành công.";
+
+                // Thông báo tạo mới thành công
+                TempData["StatusMessage"] = "Tạo mới yêu cầu thành công.";
                 return RedirectToAction("Index", "Home");
             }
+
+            // Nếu Model không hợp lệ, truyền lại dữ liệu cho View
             ViewData["PriorityID"] = new SelectList(_context.Set<Priority>(), "PriorityID", "Description", request.PriorityID);
             ViewData["StatusID"] = new SelectList(_context.Set<Status>(), "StatusID", "StatusName", request.StatusID);
             ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName", request.WorkflowID);
+
             return View(request);
         }
 

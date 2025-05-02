@@ -1,4 +1,4 @@
-@model App.Models.IRequest.Request
+@* @model App.Models.IRequest.Request
 
 @{
     ViewData["Title"] = "Create";
@@ -55,6 +55,90 @@
                 </div>
                 <div class="col-md-12 d-flex justify-content-start">
                     <button class="btn btn-primary mb-3" type="submit" value="Create" class="btn btn-primary">
+                        Tạo mới
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <a asp-action="Index" class="text-decoration-none">Back to List</a>
+        </div>
+    </div>
+</div> *@
+
+@model App.Models.IRequest.Request
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container-fluid">
+    <div class="row mt-4" style="font-size: 1.2rem;">
+        <div class="mx-3">
+            <span>Home</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["controller"]</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["action"]</span>
+        </div>
+    </div>
+    <div class="row md-4"></div>
+        <h1 class="p-3 mt-0">@ViewData["Title"]</h1>
+    </div>
+    <div class="row md-4 mx-3">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="form-group mb-4">
+                    <label asp-for="Title" class="control-label mb-1"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4">
+                    <label asp-for="Description" class="control-label mb-1"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-1">
+                    <label asp-for="AttachmentURL" class="control-label mb-1"></label>
+                    <input asp-for="AttachmentURL" class="form-control" />
+                    <span asp-validation-for="AttachmentURL" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-4 form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsApproved" /> @Html.DisplayNameFor(model => model.IsApproved)
+                    </label>
+                </div>
+
+                <!-- Kiểm tra vai trò từ ViewBag -->
+                @if (ViewBag.IsAdminOrMember != null && (bool)ViewBag.IsAdminOrMember)
+                {
+                    <!-- Hiển thị trường PriorityID nếu người dùng là Admin hoặc Member -->
+                    <div class="form-group mb-4">
+                        <label asp-for="PriorityID" class="control-label mb-1"></label>
+                        <select asp-for="PriorityID" class="form-control" asp-items="ViewBag.PriorityID"></select>
+                    </div>
+
+                    <!-- Hiển thị trường StatusID nếu người dùng là Admin hoặc Member -->
+                    <div class="form-group mb-4">
+                        <label asp-for="StatusID" class="control-label mb-1"></label>
+                        <select asp-for="StatusID" class="form-control" asp-items="ViewBag.StatusID"></select>
+                    </div>
+
+                    <!-- Hiển thị trường WorkflowID nếu người dùng là Admin hoặc Member -->
+                    <div class="form-group mb-4">
+                        <label asp-for="WorkflowID" class="control-label mb-1"></label>
+                        <select asp-for="WorkflowID" class="form-control" asp-items="ViewBag.WorkflowID"></select>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nếu người dùng không phải Admin hoặc Member, ẩn các trường Priority, Status và Workflow -->
+                    <p class="text-muted">Các nội dung khác sẽ được xử lý bởi quản trị viên</p>
+                }
+
+                <div class="col-md-12 d-flex justify-content-start">
+                    <button class="btn btn-primary mb-3" type="submit" value="Create">
                         Tạo mới
                     </button>
                 </div>

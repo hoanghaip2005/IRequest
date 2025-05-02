@@ -2,7 +2,45 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 text-primary">Welcome to IRequest System Management</h1>
+        <p class="lead text-secondary">Build modern web applications with <strong>ASP.NET Core</strong>.</p>
+        <a href="https://learn.microsoft.com/aspnet/core" class="btn btn-primary btn-lg mt-3">
+            <i class="fas fa-book"></i> Learn More
+        </a>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-database fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Manage Database</h5>
+                    <p class="card-text">Easily manage your database with built-in tools.</p>
+                    <a href="/database-manage/index" class="btn btn-outline-primary">Go to Database</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-tasks fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Manage Requests</h5>
+                    <p class="card-text">Track and manage all your requests efficiently.</p>
+                    <a href="/request/home" class="btn btn-outline-success">View Requests</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">User Management</h5>
+                    <p class="card-text">Manage users and roles with ease.</p>
+                    <a href="/identity/user" class="btn btn-outline-warning">Manage Users</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

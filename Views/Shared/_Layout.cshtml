@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -64,7 +66,7 @@
                     <a href="#" class="btn m-2">
                         <i class="fa fa-regular fa-bell"></i>
                     </a>
-                    @* <partial name="_LoginPartial" /> *@
+                    <partial name="_LoginPartial" />
                     <partial name="_MenuManagePartial" />
 
                 </div>
@@ -73,58 +75,8 @@
     </header>
 
     <div class="d-flex">
-        <nav class="bg-light border-end" style="width: 250px; min-height: 100vh;">
-            <ul class="nav flex-column p-3">
-                <li class="nav-item">
-                    <a class="nav-link active text-dark" asp-area="IRequest" asp-controller="Request" asp-action="ViewHome">
-                        <i class="fa fa-solid fa-house"></i>
-                        Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" asp-action="Index" asp-controller="DbManage" asp-area="Database">
-                        <i class="fa fa-solid fa-database"></i>
-                        Database
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Request" asp-action="Index">
-                        <i class="fa fa-solid fa-file"></i>
-                        Quản lý yêu cầu
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Status" asp-action="Index">
-                        <i class="fa fa-solid fa-gauge"></i>
-                        Quản Lý Trạng Thái
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="WorkflowStep" asp-action="Index">
-                        <i class="fa fa-solid fa-stairs"></i>
-                        Quản Lý Bước Quy Trình
-                    </a> 
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Workflow" asp-action="Index">
-                        <i class="fa fa-solid fa-briefcase"></i>
-                        Quản Lý Quy Trình
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Priority" asp-action="Index">
-                        <i class="fa fa-solid fa-map-pin"></i>
-                        Quản Lý Ưu Tiên
-                    </a>
-                </li>
-                <li class="nav-item"></li>
-                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Department" asp-action="Index">
-                        <i class="fa fa-solid fa-people-roof"></i>
-                        Quản Lý Phòng Ban
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <partial name="_NavTask" />
+        
 
         <div class="container-fluid">
             <main role="main" class="pb-3">
@@ -139,11 +91,6 @@
         </div>
     </div>
 
-    @* <footer class="footer border-top text-muted">
-        <div class="container">
-            &copy; 2025 - App - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer> *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

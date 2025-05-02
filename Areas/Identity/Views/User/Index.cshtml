@@ -1,0 +1,85 @@
+@model UserListModel
+@{
+    ViewData["Title"] = "Danh sách các thành viên";
+}
+
+<style>
+    table tr, table th, table td {
+        border: 1px solid rgba(0, 0, 0, 0.1); /* viền xám nhạt */
+    }
+
+    table th {
+        background-color: #A6AEBF; /* giữ màu như bạn có */
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mt-4" style="font-size: 1.2rem;">
+        <div class="mx-2">
+            <span>Home</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["controller"]</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["action"]</span>
+        </div>
+    </div>
+    <div class="row">
+        <h1 class="p-3 mt-0">@ViewData["Title"]</h1>
+    </div>
+    <partial name="_StatusMessage"></partial>
+    <div class="row mb-4">
+        <span class="text-muted">Tổng số thành viên: @Model.totalUsers</span>
+    </div>
+<div class="col-md-8 shadow-sm card rounded-3 overflow-hidden">
+    <table class="table table-group-divider border-0 m-0 align-middle">
+        <thead style="background-color: #A6AEBF;">
+            <tr>
+                <th class="text-dark opacity-75">Tên user</th>
+                <th class="text-dark opacity-75">Vai trò (role)</th>
+                <th class="text-dark opacity-75">Tác vụ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.users)
+            {
+                <tr>
+                    <td class="fw-semibold">@user.UserName</td>
+                    <td>
+                        @if (string.IsNullOrEmpty(user.RoleNames))
+                        {
+                            <a class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill text-decoration-none shadow-sm" asp-action="AddRole" asp-route-id="@user.Id">
+                                <i class="bi bi-plus-circle me-1"></i>Thêm role
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-action="AddRole" asp-route-id="@user.Id"
+                            class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill text-decoration-none shadow-sm">
+                                @user.RoleNames
+                            </a>
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-success btn-sm" asp-action="SetPassword" asp-route-id="@user.Id">Đặt mật khẩu</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+    @{
+        var pagingmodel = new PagingModel()
+        {
+            currentpage = Model.currentPage,
+            countpages = Model.countPages,
+            generateUrl = (int? p) => Url.Action("Index", new { p = p})
+        };
+    }
+
+    <partial name="_PagingXTL" model="@pagingmodel" />
+</div>
+
+

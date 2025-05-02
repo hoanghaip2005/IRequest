@@ -142,6 +142,10 @@
               "target": "Package",
               "version": "[4.11.0, )"
             },
+            "MySql.Data.EntityFramework": {
+              "target": "Package",
+              "version": "[9.3.0, )"
+            },
             "MySql.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.3, )"

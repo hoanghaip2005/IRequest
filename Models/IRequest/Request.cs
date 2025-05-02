@@ -44,6 +44,10 @@ namespace App.Models.IRequest
         [ForeignKey("WorkflowID")]
         [Display(Name = "Danh mục quy trình")]
         public Workflow? Workflow { get; set; }
+        [Display(Name = "Người dùng")]
+        public string UsersId { get; set; }
+        [ForeignKey("UsersId")]
+        public AppUser? User { get; set; }
 
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -53,5 +57,4 @@ namespace App.Models.IRequest
         public DateTime? ClosedAt { get; set; }
 
     }
-
 }

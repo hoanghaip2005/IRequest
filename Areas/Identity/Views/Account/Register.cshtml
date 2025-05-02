@@ -1,0 +1,120 @@
+﻿@inject SignInManager<AppUser> SignInManager
+
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="row mt-xl-5">
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <!-- Cột trái -->
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-6 d-flex flex-column align-items-center justify-content-center">
+                <div class="mb-4">
+                    <img src="~/images/UMT/iRequest.png" alt="Logo" class="img-fluid"
+                        style="height: 70px !important;" />
+                </div>
+                <div class="text-center px-4">
+                    <h4>Welcome Back to iRequest</h4>
+                    <p class="mb-4">Enter your username and password to continue.</p>
+                </div>
+                <div class="w-50 px-4">
+                    <section>
+                        <form asp-controller="Account" asp-action="Register"
+                            asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal"
+                            role="form">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group mb-4">
+                                <label asp-for="UserName" class=" control-label mb-2"></label>
+                                <div>
+                                    <input asp-for="UserName" class="form-control" />
+                                    <span asp-validation-for="UserName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="Email" class=" control-label mb-2"></label>
+                                <div>
+                                    <input asp-for="Email" class="form-control" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="Password" class=" control-label mb-2"></label>
+                                <div>
+                                    <input asp-for="Password" class="form-control" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label asp-for="ConfirmPassword" class=" control-label mb-2"></label>
+                                <div>
+                                    <input asp-for="ConfirmPassword" class="form-control" />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group w-100 mb-3">
+                                <div>
+                                    <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+                <div>
+                    <section>
+                        <h4 class="mb-4">Hoặc đăng nhập bằng tài khoản.</h4>
+                        @{
+                            var schemes = await SignInManager.GetExternalAuthenticationSchemesAsync();
+                            var loginProviders = schemes.ToList();
+                            if (loginProviders.Count == 0)
+                            {
+                                <div>
+                                    <p>
+                                        Ứng dụng chưa hỗ trợ đăng nhập từ tài khoản ngoài
+                                    </p>
+                                </div>
+                            }
+                            else
+                            {
+                                <form asp-controller="Account" asp-action="ExternalLogin"
+                                    asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal"
+                                    role="form">
+                                    <div class="row">
+                                        @foreach (var provider in loginProviders)
+                                        {
+                                            <div class="col-6 mb-2">
+                                                <button type="submit" class="btn btn-primary w-100" name="provider"
+                                                    value="@provider.Name"
+                                                    title="Log in using your @provider.Name account">@provider.Name</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </form>
+                            }
+                        }
+                    </section>
+                </div>
+            </div>
+
+            <!-- Cột phải: Ảnh UMT -->
+            <div class="col-sm-4 d-flex align-items-center justify-content-center">
+                <img src="~/images/UMT/umt.jpg" alt="UMT" class="img-fluid w-100 h-100 rounded p-5 object-fit-cover"
+                    style="object-position: center; border-radius: 64px !important ;" />
+            </div>
+            <div class="col-sm-1    ">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,10 +1,18 @@
+using App.Data;
 using App.ExtendMethods;
 using App.Models;
 using App.Models.IRequest;
+using App.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOptions();
+var mailsetting = builder.Configuration.GetSection("MailSettings");
+builder.Services.Configure<MailSettings>(mailsetting);
+builder.Services.AddSingleton<IEmailSender, SendMailService>();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -12,12 +20,14 @@ string? connectString = builder.Configuration.GetConnectionString("AppMvcCollect
 
 MyGlobalConfig.ContentRootPath = builder.Environment.ContentRootPath;
 
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(connectString);
 });
 
-builder.Services.AddIdentity<Users, IdentityRole>()
+builder.Services.AddIdentity<AppUser, IdentityRole>()
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
@@ -77,6 +87,15 @@ builder.Services.AddAuthentication()
         // .AddMicrosoftAccount()
         ;
 
+builder.Services.AddSingleton<IdentityErrorDescriber, AppIdentityErrorDescriber>();
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("ViewManageMenu", builder => {
+        builder.RequireAuthenticatedUser();
+        builder.RequireRole(RoleName.Administrator);
+    });
+});
+
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 var app = builder.Build();
 

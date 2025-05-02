@@ -20,10 +20,6 @@ namespace App.Models.IRequest
 
         public bool IsActive { get; set; } = true;
 
-        public ICollection<Users> Users { get; set; }
-        public Department()
-        {
-            Users = new HashSet<Users>();
-        }
+        public ICollection<AppUser> Users { get; set; } = new HashSet<AppUser>();
     }
 }

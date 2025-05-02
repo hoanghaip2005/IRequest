@@ -1,0 +1,89 @@
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService authorizationService
+
+@{
+    var result = await authorizationService.AuthorizeAsync(this.User, "ViewManageMenu");
+}
+
+@if (result.Succeeded)
+{ 
+    <div>
+        <nav class="bg-light border-end" style="width: 250px; min-height: 100vh;">
+            <ul class="nav flex-column p-3">
+                <li class="nav-item">
+                    <a class="nav-link active text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="fa fa-solid fa-house"></i>
+                        Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-action="Index" asp-controller="DbManage" asp-area="Database">
+                        <i class="fa fa-solid fa-database"></i>
+                        Database
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Request" asp-action="Index">
+                        <i class="fa fa-solid fa-file"></i>
+                        Quản lý yêu cầu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Status" asp-action="Index">
+                        <i class="fa fa-solid fa-gauge"></i>
+                        Quản Lý Trạng Thái
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="WorkflowStep" asp-action="Index">
+                        <i class="fa fa-solid fa-stairs"></i>
+                        Quản Lý Bước Quy Trình
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Workflow" asp-action="Index">
+                        <i class="fa fa-solid fa-briefcase"></i>
+                        Quản Lý Quy Trình
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Priority" asp-action="Index">
+                        <i class="fa fa-solid fa-map-pin"></i>
+                        Quản Lý Ưu Tiên
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Department" asp-action="Index">
+                        <i class="fa fa-solid fa-people-roof"></i>
+                        Quản Lý Phòng Ban
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="Identity" asp-controller="Role" asp-action="Index">
+                        <i class="fa fa-solid fa-people-roof"></i>
+                        Quản Lý Role
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="Identity" asp-controller="User" asp-action="Index">
+                        <i class="fa fa-solid fa-people-roof"></i>
+                        Quản Lý Nhân Viên
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+} else if (!User.IsInRole("Admin") || !User.IsInRole("Member"))
+{
+    <div>
+         <nav class="bg-light border-end" style="width: 250px; min-height: 100vh;">
+            <ul class="nav flex-column p-3">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="IRequest" asp-controller="Request" asp-action="Index">
+                        <i class="fa fa-solid fa-file"></i>
+                        Quản lý yêu cầu
+                    </a>
+                </li>
+        </nav>
+    </div>
+}

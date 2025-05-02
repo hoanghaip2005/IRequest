@@ -1,5 +1,0 @@
-Host github.com
-    User git
-    Port 22
-    PreferredAuthentications publickey
-    IdentityFile "/c/Workspace/C#/gitkey/id_rsa"

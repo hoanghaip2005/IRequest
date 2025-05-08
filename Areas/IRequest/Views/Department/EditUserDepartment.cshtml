@@ -1,0 +1,31 @@
+@using App.Models
+@model AppUser
+
+@{
+    ViewData["Title"] = "Edit User Department";
+}
+
+<h2>Edit User Department</h2>
+
+<form method="post" asp-action="EditUserDepartment" asp-route-userId="@Model.Id">
+    <div class="form-group">
+        <label asp-for="UserName" class="control-label"></label>
+        <input asp-for="UserName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DepartmentID" class="control-label">Department</label>
+        <select asp-for="DepartmentID" class="form-control" asp-items="@(ViewData["DepartmentID"] as SelectList)">
+            <option value="">Select a Department</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>

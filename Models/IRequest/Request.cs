@@ -49,12 +49,19 @@ namespace App.Models.IRequest
         [ForeignKey("UsersId")]
         public AppUser? User { get; set; }
 
+        [Display(Name = "Người được giao")]
+        public string AssignedUserId { get; set; }
+
+        [ForeignKey("AssignedUserId")]
+        public AppUser? AssignedUser { get; set; }
+
+
+
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         [Display(Name = "Ngày cập nhật")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        
-        public DateTime? ClosedAt { get; set; }
 
+        public DateTime? ClosedAt { get; set; }
     }
 }

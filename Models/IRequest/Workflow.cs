@@ -16,12 +16,12 @@ namespace App.Models.IRequest
         [Display(Name = "Danh mục ưu tiên")]
         public int? PriorityID { get; set; }
         [ForeignKey("PriorityID")]
-        [Display(Name = "Tên danh mục ưu tiên")]
+        [Display(Name = "Độ ưu tiên")]
         public Priority? Priority { get; set; }
         [Display(Name = "Mô tả")]
         [DataType(DataType.Text)]
         public string? Description { get; set; }
-        [Display(Name = "Có đang hoạt động không")]
+        [Display(Name = "Is Work?")]
         public bool IsActive { get; set; } = true;
 
         public ICollection<WorkflowStep> Steps { get; set; }

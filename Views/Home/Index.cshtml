@@ -1,4 +1,4 @@
-﻿@{
+﻿@* @{
     ViewData["Title"] = "Home Page";
 }
 
@@ -40,6 +40,112 @@
                     <p class="card-text">Manage users and roles with ease.</p>
                     <a href="/identity/user" class="btn btn-outline-warning">Manage Users</a>
                 </div>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container mt-5">
+
+    <!-- What is IRequest? Section -->
+    <div class="row text-center mb-5">
+        <div class="col-md-12">
+            <h2 class="display-5">What is IRequest?</h2>
+            <p class="lead text-secondary">IRequest is a powerful software designed to streamline the management of requests, status tracking, and workflows. From user management to workflow automation, IRequest makes handling requests efficient and simple.</p>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-database fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Manage Database</h5>
+                    <p class="card-text">Easily manage your database with built-in tools to keep track of requests, users, and workflows.</p>
+                    <a href="/database-manage/index" class="btn btn-outline-primary">Go to Database</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-tasks fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Manage Requests</h5>
+                    <p class="card-text">Track and manage all your requests efficiently. Monitor statuses, priorities, and workflows with ease.</p>
+                    <a href="/request/home" class="btn btn-outline-success">View Requests</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">User Management</h5>
+                    <p class="card-text">Manage users and roles seamlessly. Assign roles, track permissions, and ensure proper access controls.</p>
+                    <a href="/identity/user" class="btn btn-outline-warning">Manage Users</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="row mt-5 text-center">
+        <div class="col-md-12">
+            <h2 class="display-5">Ready to get started with IRequest?</h2>
+            <p class="lead text-secondary">Sign up today and start managing your requests more efficiently!</p>
+            <a href="/account/register" class="btn btn-success btn-lg">Sign Up</a>
+        </div>
+    </div>
+
+</div>
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5">Contact Us</h2>
+        <p class="lead text-secondary">We are here to help! Reach out to us for any queries, support, or feedback.</p>
+    </div>
+
+    <!-- Contact Information Section -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <h4 class="text-primary">Contact Information</h4>
+            <p><strong>Email:</strong> support@irequest.com</p>
+            <p><strong>Phone:</strong> +123 456 7890</p>
+            <p><strong>Address:</strong> 123 IRequest Street, City, Country</p>
+        </div>
+        
+        <!-- Contact Form Section -->
+        <div class="col-md-6">
+            <h4 class="text-primary">Send Us a Message</h4>
+            <form method="post" action="/contact/send">
+                <div class="form-group mb-3">
+                    <label for="name">Your Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required placeholder="Enter your name">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="email">Your Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="message">Your Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="4" required placeholder="Write your message"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h4 class="text-primary text-center">Find Us Here</h4>
+            <div class="embed-responsive embed-responsive-16by9" style="display: flex; justify-content: center;">
+                <a href="https://maps.app.goo.gl/cAqo7a7zyNQCaLWLA" target="_blank">Xem vị trí tại UMT - Trường Đại học Quản lý và Công nghệ TP.HCM</a>
             </div>
         </div>
     </div>

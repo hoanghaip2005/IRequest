@@ -1,4 +1,4 @@
-@model App.Models.IRequest.Department
+@* @model App.Models.IRequest.Department
 
 @{
     ViewData["Title"] = "Details";
@@ -39,4 +39,55 @@
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.DepartmentID">Edit</a> |
     <a asp-action="Index">Back to List</a>
+</div> *@
+
+@model App.Models.IRequest.Department
+
+@{
+    ViewData["Title"] = "Department Detail";
+}
+
+<h2>@Model.Name - Department Details</h2>
+
+<a href="@Url.Action("AddUser", "Department", new { departmentId = Model.DepartmentID })" class="btn btn-primary mb-3">
+    Add User to Department
+</a>
+<div>
+    <p><strong>Description:</strong> @Model.Description</p>
+    <p><strong>Status:</strong> @(Model.IsActive ? "Active" : "Inactive")</p>
+    <p><strong>Created At:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
 </div>
+
+<hr />
+
+<h4>Users in this Department</h4>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@user.PhoneNumber</td>
+                <td>
+                    <form method="post" asp-action="RemoveUserFromDepartment" 
+                          asp-route-departmentId="@Model.DepartmentID" 
+                          asp-route-userId="@user.Id" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Index", "Department")" class="btn btn-secondary">Back to Department List</a>

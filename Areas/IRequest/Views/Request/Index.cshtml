@@ -1,137 +1,855 @@
 @model IEnumerable<App.Models.IRequest.Request>
+@using App.Models
+@using App.Models.IRequest
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService authorizationService
 
+@{
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var isAdmin = User.IsInRole("Admin");
+    var isMember = User.IsInRole("Member");
+    var canViewManageMenu = await authorizationService.AuthorizeAsync(User, "ViewManageMenu");
+}
 @{
     ViewData["Title"] = "Request List";
 }
 
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Bootstrap JS (cần thiết cho các chức năng dropdown) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
 <div class="container-fluid">
-    <partial name="~/Areas/IRequest/Views/_TagHomePage.cshtml" />
-    <div class="row mb-4">
-        <div>
-            <form method="get" asp-action="Index" class="row mb-4 align-items-center">
-                <div class="col-md-1">
-                    <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm..." value="@ViewData["searchString"]">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="row mb-3">
+                <partial name="~/Areas/IRequest/Views/_TagHomePage.cshtml"/>
+                <div>
+                    <form method="get" asp-action="Index" class="row mb-4 align-items-center">
+                        <div class="col-md-2">
+                            <input type="text" name="searchString" class="form-control drop-item    "
+                                placeholder="Tìm kiếm..." value="@ViewData["searchString"]">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="drop-item btn btn-primary w-100">Tìm kiếm</button>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dropdown">
+                                <button class="drop-item btn btn-secondary dropdown-toggle w-100" type="button"
+                                    id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Trạng thái
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                                    <li><a class="dropdown-item" href="#">Mở</a></li>
+                                    <li><a class="dropdown-item" href="#">Đang xử lý</a></li>
+                                    <li><a class="dropdown-item" href="#">Đã đóng</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="dropdown">
+                                <button class="drop-item btn btn-secondary dropdown-toggle w-100 " type="button"
+                                    id="requestTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Ngày
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="requestTypeDropdown">
+                                    <li><a class="dropdown-item" href="#">Tăng dần</a></li>
+                                    <li><a class="dropdown-item" href="#">Giảm dần</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+            </div>
+            <div class="row col-12">
+                    <table class="table" style="border-right: 0.5px solid #ccc; ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="selectAll" class="form-check-input" />
+                                </th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Reporter</th>
+                                <th>Assign</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                                <th>Resolution Time</th>
+                            </tr>
+                            <tr id="actionHeaderRow" style="display:none;">
+                                <th colspan="8">
+                                    <div class="header-action-bar" style="position:relative;">
+                                        <input type="checkbox" id="actionSelectAll" class="form-check-input" />
+                                        <span class="text-muted" id="selectedCount" style="font-weight: 300;">0 Work
+                                            Items</span>
+                                        <button class="header-action-btn"><i class="fa-regular fa-comment"></i>
+                                            Comment</button>
+                                        <div style="display:inline-block; position:relative;">
+                                            <button type="button" class="header-action-btn" id="showAssignPopupBtn">
+                                                <i class="fa-regular fa-user"></i> Assign
+                                            </button>
+                                            <div id="assignPopup" class="assign-popup" style="display:none;">
+                                                <div style="font-weight:600; margin-bottom:8px;">Assignee</div>
+                                                <div class="mb-2">
+                                                    <select id="assignUserSelect" class="form-select">
+                                                        <option value="">-- Select User --</option>
+                                                        @foreach (var user in ViewBag.AllUsers as List<AppUser>)
+                                                        {
+                                                            <option value="@user.Id">@user.UserName</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <button type="button" id="assignCancelBtn"
+                                                        class="btn btn-light btn-sm">Cancel</button>
+                                                    <button type="button" id="assignSaveBtn"
+                                                        class="btn btn-primary btn-sm">Assign</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display:inline-block; position:relative;">
+                                            <button type="button" class="header-action-btn" id="showTransitionPopupBtn">
+                                                <i class="fa-solid fa-arrow-right"></i> Transition
+                                            </button>
+                                            <div id="transitionPopup" class="assign-popup" style="display:none;">
+                                                <div style="font-weight:600; margin-bottom:8px;">Work Type</div>
+                                                <select id="workflowSelect" class="form-select mb-2" style="width:180px;">
+                                                    <option value="">-- Select Workflow --</option>
+                                                    @foreach (var wf in ViewBag.AllWorkflows as List<Workflow>)
+                                                    {
+                                                        <option value="@wf.WorkflowID">@wf.WorkflowName</option>
+                                                    }
+                                                </select>
+                                                <div style="font-weight:600; margin-bottom:8px;">Transition</div>
+                                                <select id="statusSelect" class="form-select mb-2" style="width:180px;">
+                                                    <option value="">-- Select Status --</option>
+                                                    @foreach (var st in ViewBag.AllStatuses as List<Status>)
+                                                    {
+                                                        <option value="@st.StatusID">@st.StatusName</option>
+                                                    }
+                                                </select>
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <button type="button" id="transitionCancelBtn"
+                                                        class="btn btn-light btn-sm">Cancel</button>
+                                                    <button type="button" id="transitionSaveBtn"
+                                                        class="btn btn-primary btn-sm">Transition</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display:inline-block; position:relative;">
+                                            <button type="button" class="header-action-btn" id="showApprovePopupBtn">
+                                                <i class="fa-regular fa-circle-check"></i> Approve
+                                            </button>
+                                            <div id="approvePopup" class="assign-popup" style="display:none;">
+                                                <div style="font-weight:600; margin-bottom:12px;" id="approveTitle">
+                                                    Are you sure you want to approve this 1 work item? Only applicable work
+                                                    items will be approved.
+                                                </div>
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <button type="button" id="approveCancelBtn"
+                                                        class="btn btn-light btn-sm">Cancel</button>
+                                                    <button type="button" id="approveConfirmBtn"
+                                                        class="btn btn-primary btn-sm">Confirm</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="deleteSelectedBtn" class="header-action-btn">
+                                            <i class="fa-regular fa-trash-can"></i> Delete
+                                        </button>
+                                        <button type="button" class="header-action-btn" id="editSelectedBtn">
+                                            <i class="fa-regular fa-pen-to-square"></i> Edit
+                                        </button>
+                                        <button type="button" class="header-action-btn" id="detailsSelectedBtn">
+                                            <i class="fa-regular fa-circle-info"></i> Details
+                                        </button>
+                                    </div>
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var isApproved = item.Status?.StatusName == "Approved";
+                                var approvedAt = item.UpdatedAt;
+                                var resolutionTime = item.Priority?.ResolutionTime;
+                                DateTime? resolutionDeadline = null;
+                                if (isApproved && approvedAt != null && resolutionTime != null)
+                                {
+                                    resolutionDeadline = approvedAt.AddHours((double)resolutionTime);
+                                }
+                                <tr class="request-row">
+                                    <td>
+                                        <input type="checkbox" class="form-check-input select-item" data-id="@item.RequestID" />
+                                    </td>
+                                    <td class="title-cell d-flex justify-content-between align-items-center">
+                                        <span class="title-value">@Html.DisplayFor(modelItem => item.Title)</span> 
+                                        <span class="info-icon " data-id="@item.RequestID" style="cursor:pointer; margin-left:6px;">
+                                            <i class="fa-solid fa-circle-info"></i>
+                                        </span>
+                                    </td>
+                                <td class="desc-value">@Html.DisplayFor(modelItem => item.Description)</td>
+                                <td class="assignee-value">@Html.DisplayFor(modelItem => item.User.UserName)</td>
+                                <td>
+                                    @if (item.AssignedUser != null)
+                                        {
+                                            @item.AssignedUser.UserName
+                                            @if (item.AssignedUser?.Department != null)
+                                            {
+                                                <span class="ms-2 badge bg-secondary">
+                                                    @item.AssignedUser.Department.Name
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span>No User Assigned</span>
+                                        }
+                                    </td>
+                                    <td class="status-value">@Html.DisplayFor(modelItem => item.Status.StatusName)</td>
+                                    <td class="priority-value">@Html.DisplayFor(modelItem => item.CreatedAt)</td>
+                                    <td>
+                                        @if (isApproved && resolutionDeadline != null)
+                                        {
+                                            <span class="badge bg-danger ms-2" style="font-size:13px;">
+                                                Resolution Time: @resolutionDeadline.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                            </span>
+                                        }
+                                    </td>
+                                    @* <td>
+                                        <a asp-action="Edit" asp-route-id="@item.RequestID"
+                                            class="btn btn-primary btn-sm">Edit</a>
+                                        <a asp-action="Details" asp-route-id="@item.RequestID"
+                                            class="btn btn-info btn-sm">Details</a>
+                                    </td> *@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-md-1">
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Quy trình
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                            <li><a class="dropdown-item" href="#">Mở</a></li>
-                            <li><a class="dropdown-item" href="#">Đang xử lý</a></li>
-                            <li><a class="dropdown-item" href="#">Đã đóng</a></li>
-                        </ul>
+            </div>
+            <div class="col-md-3" style="position:relative;">
+                @foreach (var item in Model)
+                {
+                    <div class="request-detail-popup" id="requestDetailPopup-@item.RequestID" style="display:none;">
+                        <!-- Card: Reporter + Description -->
+                        <div class="card mb-3 p-3" style="border-radius:12px;">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="me-2">
+                                    <i class="fa-regular fa-user-circle fa-2x"></i>
+                                </div>
+                                <div>
+                                    <b>@item.User.UserName</b>
+                                    <span class="text-muted">via Email</span>
+                                    <a href="#" class="ms-2" style="font-size:13px;">Hide details</a>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <a href="#" style="font-size:13px;">View request in portal</a>
+                            </div>
+                            <div class="mb-2">
+                                <div class="fw-bold">Description</div>
+                                <div>@item.Description</div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="fw-bold">Try it out</div>
+                                <div>
+                                    Email a request to <b>Demo service project's</b> support email address
+                                    (<a href="mailto:demo@hoanghaip2005.atlassian.net">demo@hoanghaip2005.atlassian.net</a>)
+                                    to see how it looks for your customers and agents.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card: Similar requests -->
+                        <div class="card mb-3 p-3" style="border-radius:12px;">
+                            <div class="fw-bold">Similar requests</div>
+                            <div class="text-muted" style="font-size:13px;">(No similar requests found)</div>
+                        </div>
+
+                        <!-- Card: SLAs -->
+                        <div class="card mb-3 p-3" style="border-radius:12px;">
+                            <div class="fw-bold mb-2">SLAs</div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2">@Html.DisplayFor(modelItem => item.Priority.ResolutionTime)</span>
+                                <span class="badge bg-danger me-2"><i class="fa-solid fa-pause"></i></span>
+                                <span class="text-muted" style="font-size:13px;">Time to first response within @Html.DisplayFor(modelItem => item.Priority.ResolutionTime)h</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">@Html.DisplayFor(modelItem => item.Priority.ResponseTime)</span>
+                                <span class="badge bg-danger me-2"><i class="fa-solid fa-pause"></i></span>
+                                <span class="text-muted" style="font-size:13px;">Time to resolution within @Html.DisplayFor(modelItem => item.Priority.ResponseTime)h</span>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3 p-3" style="border-radius:12px;">
+                            <div class="fw-bold mb-2">Details</div>
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="col-3 me-2 mb-2">Assignee</span>
+                                <span class="text-muted" style="font-size:13px;">
+                                    @item.AssignedUser?.UserName
+                                    @if (item.AssignedUser?.Department != null)
+                                    {
+                                        <span class="badge bg-info text-dark ms-2" style="font-size:12px;">
+                                            @item.AssignedUser.Department.Name
+                                        </span>
+                                    }
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="col-3 me-2 mb-2">Reporter</span>
+                                <span class="text-muted" style="font-size:13px;">@Html.DisplayFor(modelItem => item.User.UserName)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="col-3 me-2 mb-2">Workflow</span>
+                                <span class="text-muted" style="font-size:13px;">@Html.DisplayFor(modelItem => item.Workflow.WorkflowName)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="col-3 me-2 mb-2">Priority</span>
+                                <span class="text-muted" style="font-size:13px;">@Html.DisplayFor(modelItem => item.Priority.PriorityName)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="col-3 me-2 mb-2">Status</span>
+                                <span class="text-muted" style="font-size:13px;">@Html.DisplayFor(modelItem => item.Status.StatusName)</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="requestTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Độ ưu tiên
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="requestTypeDropdown">
-                            <li><a class="dropdown-item" href="#">Lỗi</a></li>
-                            <li><a class="dropdown-item" href="#">Tính năng</a></li>
-                            <li><a class="dropdown-item" href="#">Nhiệm vụ</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </form>
+                }
+            </div>
         </div>
-    </div>
-    <div class="col-md-10">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        <input type="checkbox" id="select-all" />
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Title)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Description)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.AttachmentURL)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.IsApproved)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.StatusID)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model) {
-                    <tr>
-                        <td>
-                            <input type="checkbox" class="row-checkbox" />
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.AttachmentURL)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.IsApproved)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.StatusID)
-                        </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.RequestID" class="btn btn-warning btn-sm text-white ">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.RequestID" class="btn btn-info btn-sm text-white ">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.RequestID" class="btn btn-danger btn-sm text-white ">Delete</a>
-                    </td>
-                </tr>
-        }
-            </tbody>
-        </table>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const selectAllCheckbox = document.getElementById('select-all');
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+<form id="deleteMultipleForm" method="post" action="/request/delete-multiple" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
 
-        selectAllCheckbox.addEventListener('change', function () {
-            rowCheckboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
-                const row = checkbox.closest('tr');
-                if (selectAllCheckbox.checked) {
-                    row.classList.add('table-success');
+<form id="hiddenForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Khi click vào selectAll ở header
+            $('#selectAll').change(function () {
+                $('.select-item').prop('checked', $(this).prop('checked'));
+                $('#actionSelectAll').prop('checked', $(this).prop('checked'));
+                toggleActionButtons();
+                updateSelectedCount();
+            });
+
+            // Khi click vào selectAll ở action bar
+            $('#actionSelectAll').change(function () {
+                $('.select-item').prop('checked', $(this).prop('checked'));
+                $('#selectAll').prop('checked', $(this).prop('checked'));
+                toggleActionButtons();
+                updateSelectedCount();
+            });
+
+            // Khi click vào từng dòng
+            $('.select-item').change(function () {
+                let allChecked = $('.select-item').length === $('.select-item:checked').length;
+                $('#selectAll').prop('checked', allChecked);
+                $('#actionSelectAll').prop('checked', allChecked);
+                toggleActionButtons();
+                updateSelectedCount();
+            });
+
+            // Hàm hiển thị/ẩn các nút action
+            function toggleActionButtons() {
+                const hasChecked = $('.select-item:checked').length > 0;
+                if (hasChecked) {
+                    $('thead tr:first-child').hide(); // Ẩn header tên cột
+                    $('#actionHeaderRow').show();     // Hiện dãy nút action
                 } else {
-                    row.classList.remove('table-success');
+                    $('thead tr:first-child').show(); // Hiện lại header tên cột
+                    $('#actionHeaderRow').hide();     // Ẩn dãy nút action
+                }
+                updateSelectedCount();
+            }
+
+            // Xử lý các nút action
+            $('#assignBtn').click(function () {
+                const selectedIds = getSelectedIds();
+                if (selectedIds.length > 0) {
+                    console.log('Assign for IDs:', selectedIds);
                 }
             });
-        });
 
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const row = this.closest('tr');
-                if (this.checked) {
-                    row.classList.add('table-success');
-                } else {
-                    row.classList.remove('table-success');
+            $('#transitionBtn').click(function () {
+                const selectedIds = getSelectedIds();
+                if (selectedIds.length > 0) {
+                    console.log('Transition for IDs:', selectedIds);
                 }
             });
+
+            $('#approveBtn').click(function () {
+                const selectedIds = getSelectedIds();
+                if (selectedIds.length > 0) {
+                    console.log('Approve for IDs:', selectedIds);
+                }
+            });
+
+            $('#deleteSelectedBtn').click(function () {
+                const selectedIds = $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                if (selectedIds.length === 0) {
+                    alert('Please select at least one item to delete.');
+                    return;
+                }
+
+                if (confirm('Are you sure you want to delete selected items?')) {
+                    // Dùng form ẩn đã có sẵn
+                    let $form = $('#deleteMultipleForm');
+                    $form.find('input[name="ids"]').remove(); // Xóa input cũ nếu có
+                    selectedIds.forEach(id => {
+                        $form.append($('<input>', { type: 'hidden', name: 'ids', value: id }));
+                    });
+                    $form.submit();
+                }
+            });
+
+            // Hàm lấy danh sách ID đã chọn
+            function getSelectedIds() {
+                return $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+            }
+
+            function updateSelectedCount() {
+                const count = $('.select-item:checked').length;
+                $('#selectedCount').text(count + ' Work Item' + (count !== 1 ? 's' : ''));
+            }
+
+            // Mở popup khi nhấn Assign
+            $('#showAssignPopupBtn').click(function (e) {
+                e.stopPropagation();
+                $('#assignPopup').toggle();
+            });
+
+            // Đóng popup khi nhấn Cancel
+            $('#assignCancelBtn').click(function () {
+                $('#assignPopup').hide();
+            });
+
+            // Đóng popup khi click ra ngoài
+            $(document).click(function (e) {
+                if (!$(e.target).closest('#assignPopup, #showAssignPopupBtn').length) {
+                    $('#assignPopup').hide();
+                }
+            });
+
+            // Xử lý lưu khi nhấn Assign
+            $('#assignSaveBtn').click(function () {
+                var assignedUserId = $('#assignUserSelect').val();
+                var selectedIds = $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                if (!assignedUserId) {
+                    alert('Please select a user to assign!');
+                    return;
+                }
+                if (selectedIds.length === 0) {
+                    alert('No items selected!');
+                    return;
+                }
+
+                // Gửi AJAX hoặc submit form để lưu (ví dụ AJAX):
+                $.ajax({
+                    url: '/request/assign-multiple',
+                    method: 'POST',
+                    data: {
+                        ids: selectedIds,
+                        assignedUserId: assignedUserId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function () {
+                        alert('Assign failed!');
+                    }
+                });
+            });
+
+            // Mở popup khi nhấn Transition
+            $('#showTransitionPopupBtn').click(function (e) {
+                e.stopPropagation();
+                $('#transitionPopup').toggle();
+            });
+
+            // Đóng popup khi nhấn Cancel
+            $('#transitionCancelBtn').click(function () {
+                $('#transitionPopup').hide();
+            });
+
+            // Đóng popup khi click ra ngoài
+            $(document).click(function (e) {
+                if (!$(e.target).closest('#transitionPopup, #showTransitionPopupBtn').length) {
+                    $('#transitionPopup').hide();
+                }
+            });
+
+            // Xử lý lưu khi nhấn Transition
+            $('#transitionSaveBtn').click(function () {
+                var workflowId = $('#workflowSelect').val();
+                var statusId = $('#statusSelect').val();
+                var selectedIds = $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                if (!workflowId) {
+                    alert('Please select a workflow!');
+                    return;
+                }
+                if (!statusId) {
+                    alert('Please select a status!');
+                    return;
+                }
+                if (selectedIds.length === 0) {
+                    alert('No items selected!');
+                    return;
+                }
+
+                // Gửi AJAX hoặc submit form để lưu (ví dụ AJAX):
+                $.ajax({
+                    url: '/request/transition-multiple',
+                    method: 'POST',
+                    data: {
+                        ids: selectedIds,
+                        workflowId: workflowId,
+                        statusId: statusId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function () {
+                        alert('Transition failed!');
+                    }
+                });
+            });
+
+            // Mở popup khi nhấn Approve
+            $('#showApprovePopupBtn').click(function (e) {
+                e.stopPropagation();
+                // Đếm số work item được chọn
+                var count = $('.select-item:checked').length;
+                $('#approveTitle').text(
+                    `Are you sure you want to approve this ${count} work item${count !== 1 ? 's' : ''}? Only applicable work items will be approved.`
+                );
+                $('#approvePopup').toggle();
+            });
+
+            // Đóng popup khi nhấn Cancel
+            $('#approveCancelBtn').click(function () {
+                $('#approvePopup').hide();
+            });
+
+            // Đóng popup khi click ra ngoài
+            $(document).click(function (e) {
+                if (!$(e.target).closest('#approvePopup, #showApprovePopupBtn').length) {
+                    $('#approvePopup').hide();
+                }
+            });
+
+            // Xử lý lưu khi nhấn Confirm
+            $('#approveConfirmBtn').click(function () {
+                var selectedIds = $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                if (selectedIds.length === 0) {
+                    alert('No items selected!');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/request/approve-multiple',
+                    method: 'POST',
+                    data: {
+                        ids: selectedIds,
+                        __RequestVerificationToken: $('#hiddenForm input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert('Approve failed! ' + (xhr.responseText || ''));
+                    }
+                });
+            });
+
+            $('.info-icon').click(function (e) {
+                e.stopPropagation();
+                var id = $(this).data('id');
+                // Ẩn tất cả popup
+                $('.request-detail-popup').hide();
+                // Hiện popup tương ứng
+                $('#requestDetailPopup-' + id).show();
+            });
+
+            // Ẩn panel khi click ra ngoài
+            $(document).click(function (e) {
+                if (!$(e.target).closest('.request-detail-popup, .info-icon').length) {
+                    $('.request-detail-popup').hide();
+                }
+            });
+
+            $('#editSelectedBtn').click(function () {
+                const selectedIds = $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                if (selectedIds.length !== 1) {
+                    alert('Please select exactly one item to edit.');
+                    return;
+                }
+                // Chuyển hướng đến trang Edit của request đầu tiên được chọn
+                window.location.href = '/request/edit/' + selectedIds[0];
+            });
+
+            $('#detailsSelectedBtn').click(function () {
+                const selectedIds = $('.select-item:checked').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                if (selectedIds.length !== 1) {
+                    alert('Please select exactly one item to view details.');
+                    return;
+                }
+                // Chuyển hướng đến trang Details của request đầu tiên được chọn
+                window.location.href = '/request/details/' + selectedIds[0];
+            });
         });
-    });
-</script>
+    </script>
+}
 
 <style>
-    .table-success {
-        background-color: #d4edda !important;
+    .table-active {
+        background-color: #e9ecef !important;
+    }
+
+    .btn-action {
+        align-items: baseline;
+        border-width: 0px;
+        border-radius: var(--ds-border-radius, 3px);
+        font-size: inherit;
+        padding: 0px 10px;
+        justify-content: center;
+        background: var(--ds-background-neutral-subtle, #00000000);
+        color: var(--ds-text, #172B4D);
+        outline: black solid 1px;
+    }
+
+    .header-action-bar {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 2 px 0;
+        position: relative;
+    }
+
+    .header-action-btn {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #222;
+        border-radius: 6px;
+        padding: 4px 14px;
+        font-size: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, border 0.15s;
+    }
+
+    .header-action-btn i {
+        margin-right: 6px;
+        font-size: 12px;
+    }
+
+    .header-action-btn:hover {
+        background: #f3f4f6;
+        border-color: #bdbdbd;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: #fff;
+        border-radius: 8px;
+        padding: 24px 32px;
+        min-width: 320px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .assign-popup {
+        position: absolute;
+        top: 110%;
+        left: 0;
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        padding: 18px 20px 14px 20px;
+        z-index: 3000;
+        min-width: 320px;
+    }
+
+    .request-detail-popup {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        width: 100%;
+        min-width: 220px;
+        max-width: 100%;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border-radius: 12px;
+        margin-bottom: 18px;
+        background: #fff;
+    }
+
+    .fw-bold { font-weight: 600; }
+    .badge.bg-danger {
+        background: #d9534f;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 4px 10px;
+    }
+
+    .title-cell .info-icon {
+        display: none !important;
+    }
+
+    .title-cell:hover .info-icon {
+        display: inline-block !important;
+    }
+
+    .detail-card {
+        position: fixed;
+        top: 40px;      /* hoặc 24px, tùy bạn muốn sát header cỡ nào */
+        right: 40px;    /* hoặc 24px */
+        width: 340px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+        border: 1px solid #e0e0e0;
+        padding: 0 0 18px 0;
+        z-index: 2000;
+    }
+
+    .card-title-row {
+        padding: 18px 24px 8px 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .card-status-row {
+        padding: 12px 24px 8px 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-item {
+        padding: 12px 24px 8px 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-item-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .drop-item {
+        font-size: 12px !important;
+        height: 32px !important;
+    }
+
+    #requestDetailPanel {
+        right: 4px;
+        top: 72px;
+    }
+
+    .detail-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        margin-top: 24px;
+    }
+
+    .detail-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #e0e0e0;
+        padding: 18px 20px 14px 20px;
+        outline: 1.5px solid #f0f0f0;
+        margin-bottom: 0;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .detail-card-panel {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #e0e0e0;
+        padding: 18px 20px 14px 20px;
+        outline: 1.5px solid #f0f0f0;
+        margin-bottom: 18px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .badge.bg-info {
+        background: #e3f2fd;
+        color: #1976d2;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 4px 10px;
     }
 </style>
+
+  
+ 

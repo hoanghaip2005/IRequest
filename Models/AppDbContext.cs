@@ -64,7 +64,11 @@ namespace App.Models
                       .HasForeignKey(r => r.UsersId)      // Khóa ngoại UserId trong Request
                       .OnDelete(DeleteBehavior.Restrict); // Không xóa Cascade, không xóa khi xóa User
             });
-
+            modelBuilder.Entity<AppUser>()
+                .HasOne(u => u.Department)  // Một AppUser thuộc về một Department
+                .WithMany(d => d.Users)     // Một Department có nhiều AppUser
+                .HasForeignKey(u => u.DepartmentID)  // Khóa ngoại từ AppUser đến Department
+                .OnDelete(DeleteBehavior.SetNull); 
         }
         // public DbSet<Contact> Contacts { get; set; } 
         public DbSet<App.Models.IRequest.Request> Requests { get; set; }

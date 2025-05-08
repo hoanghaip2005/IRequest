@@ -98,7 +98,7 @@ namespace Request.Areas.IRequest.Controllers
             {
                 return NotFound();
             }
-            ViewData["PriorityID"] = new SelectList(_context.Priorities, "PriorityID", "Description", workflow.PriorityID);
+            ViewData["PriorityID"] = new SelectList(_context.Priorities, "PriorityID", "PriorityName", workflow.PriorityID);
             return View(workflow);
         }
 
@@ -132,7 +132,7 @@ namespace Request.Areas.IRequest.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PriorityID"] = new SelectList(_context.Priorities, "PriorityID", "Description", workflow.PriorityID);
+            ViewData["PriorityID"] = new SelectList(_context.Priorities, "PriorityID", "PriorityName", workflow.PriorityID);
             return View(workflow);
         }
 

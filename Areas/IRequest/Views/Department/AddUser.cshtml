@@ -1,0 +1,25 @@
+@using App.Models
+@model App.Models.IRequest.Department
+
+@{
+    ViewData["Title"] = "Add User to Department";
+}
+
+<h2>Add User to Department</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="UserId">Select User</label>
+        <select id="UserId" name="userId" class="form-control">
+            <option value="">Select a User</option>
+            @foreach (var user in (IEnumerable<AppUser>)ViewData["UsersNotInDepartment"])
+            {
+                <option value="@user.Id">@user.UserName</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add User</button>
+</form>
+
+<a href="@Url.Action("Details", "Department", new { id = Model.DepartmentID })" class="btn btn-secondary mt-3">Back to Department Details</a>

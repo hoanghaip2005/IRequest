@@ -1,4 +1,5 @@
-@model App.Models.IRequest.Request
+@using App.Models
+@* @model App.Models.IRequest.Request
 
 @{
     ViewData["Title"] = "Edit";
@@ -20,8 +21,13 @@
     <div class="row md-4 mx-3">
         <div class="col-md-4">
             <form asp-action="Edit" method="post">
+                <input asp-for="RequestID" type="hidden" />
+                <input asp-for="StatusID" type="hidden" />
+                <input asp-for="PriorityID" type="hidden" />
+                <input asp-for="WorkflowID" type="hidden" />
+                <input asp-for="IsApproved" type="hidden" />
+                <input asp-for="UsersId" type="hidden" />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="RequestID" />
                 <div class="form-group mb-4">
                     <label asp-for="Title" class="control-label mb-1"></label>
                     <input asp-for="Title" class="form-control" />
@@ -83,4 +89,58 @@
             <a asp-action="Index" class="text-decoration-none">Back to List</a>
         </div>
     </div>
-</div>
+</div> *@
+@model App.Models.IRequest.Request
+
+<h2>Edit Request</h2>
+
+<form method="post">
+    <input asp-for="RequestID" type="hidden" />
+    <input asp-for="StatusID" type="hidden" />
+    <input asp-for="WorkflowID" type="hidden" />
+    <input asp-for="IsApproved" type="hidden" />
+    <input asp-for="UsersId" type="hidden" />
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PriorityID" class="control-label"></label>
+        <select asp-for="PriorityID" class="form-control" asp-items="ViewBag.PriorityID"></select>
+        <span asp-validation-for="PriorityID" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AttachmentURL" class="control-label"></label>
+        <input asp-for="AttachmentURL" class="form-control" />
+        <span asp-validation-for="AttachmentURL" class="text-danger"></span>
+    </div>
+
+    <!-- Display the requester (should be readonly) -->
+    <div class="form-group">
+        <label asp-for="UsersId" class="control-label">Requester</label>
+        <input type="text" class="form-control" value="@Model.User?.UserName" readonly />
+    </div>
+
+    <!-- Dropdown to assign a user (assigned user) -->
+    <div class="form-group">
+        <label asp-for="AssignedUserId" class="control-label">Assign User</label>
+        <select asp-for="AssignedUserId" class="form-control" asp-items="@(ViewData["Users"] as SelectList)">
+            <option value="">Select a User</option>
+        </select>
+        <span asp-validation-for="AssignedUserId" class="text-danger"></span>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<a href="@Url.Action("Index", "Request", new { id = Model.RequestID })" class="btn btn-secondary">Back to Request</a>

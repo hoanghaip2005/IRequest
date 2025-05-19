@@ -22,6 +22,12 @@ namespace App.Models.IRequest
         [Display(Name = "StepOrder")]
         public int StepOrder { get; set; } = 0;
 
+        [Display(Name = "Người phụ trách")]
+        public string? AssignedUserId { get; set; }
+        [ForeignKey("AssignedUserId")]
+        [Display(Name = "Người phụ trách")]
+        public AppUser? AssignedUser { get; set; }
+
         // [Display(Name = "Danh mục Roles")]
         // public int? AssignedToRole { get; set; }
         // [ForeignKey("AssignedToRole")]

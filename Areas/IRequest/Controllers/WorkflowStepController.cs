@@ -25,7 +25,11 @@ namespace Request.Areas.IRequest.Controllers
         [HttpGet("/workflowStep")]
         public async Task<IActionResult> Index(string searchString)
         {
-            var workflowSteps = _context.WorkflowSteps.Include(w => w.statsus).Include(w => w.Workflow).AsQueryable();
+            var workflowSteps = _context.WorkflowSteps
+                .Include(w => w.statsus)
+                .Include(w => w.Workflow)
+                .Include(w => w.AssignedUser)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -47,6 +51,7 @@ namespace Request.Areas.IRequest.Controllers
             var workflowStep = await _context.WorkflowSteps
                 .Include(w => w.statsus)
                 .Include(w => w.Workflow)
+                .Include(w => w.AssignedUser)
                 .FirstOrDefaultAsync(m => m.StepID == id);
             if (workflowStep == null)
             {
@@ -59,28 +64,51 @@ namespace Request.Areas.IRequest.Controllers
         public string StatusMessage { set; get; }
 
         [HttpGet("/workflowStep/create")]
-        [AllowAnonymous]
         public IActionResult Create()
         {
+            var workflows = _context.Workflows
+                .Where(w => w.IsActive)
+                .OrderBy(w => w.WorkflowName)
+                .ToList();
+
+            ViewData["WorkflowID"] = new SelectList(workflows, "WorkflowID", "WorkflowName");
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName");
-            ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName");
+            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName");
             return View();
         }
 
         [HttpPost("/workflowStep/create")]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("StepID,StepName,WorkflowID,StepOrder,TimeLimitHours,ApprovalRequired,StatusID")] WorkflowStep workflowStep)
+        public async Task<IActionResult> Create([Bind("StepID,StepName,WorkflowID,StepOrder,AssignedUserId,TimeLimitHours,ApprovalRequired,StatusID")] WorkflowStep workflowStep)
         {
             if (ModelState.IsValid)
             {
+                // Kiểm tra xem Workflow có tồn tại và đang active không
+                var workflow = await _context.Workflows.FindAsync(workflowStep.WorkflowID);
+                if (workflow == null || !workflow.IsActive)
+                {
+                    ModelState.AddModelError("WorkflowID", "Quy trình không tồn tại hoặc đã bị vô hiệu hóa");
+                    var workflows = _context.Workflows
+                        .Where(w => w.IsActive)
+                        .OrderBy(w => w.WorkflowName)
+                        .ToList();
+                    ViewData["WorkflowID"] = new SelectList(workflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
+                    ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
+                    ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+                    return View(workflowStep);
+                }
+
                 _context.Add(workflowStep);
                 await _context.SaveChangesAsync();
-                TempData["StatusMessage"] = "Thêm mới thành công!";
                 return RedirectToAction(nameof(Index));
             }
+            var activeWorkflows = _context.Workflows
+                .Where(w => w.IsActive)
+                .OrderBy(w => w.WorkflowName)
+                .ToList();
+            ViewData["WorkflowID"] = new SelectList(activeWorkflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-            ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
+            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
             return View(workflowStep);
         }
 
@@ -98,15 +126,22 @@ namespace Request.Areas.IRequest.Controllers
             {
                 return NotFound();
             }
+
+            var activeWorkflows = _context.Workflows
+                .Where(w => w.IsActive)
+                .OrderBy(w => w.WorkflowName)
+                .ToList();
+
+            ViewData["WorkflowID"] = new SelectList(activeWorkflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-            ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
+            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
             return View(workflowStep);
         }
 
 
         [HttpPost("/workflowStep/edit/{id?}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("StepID,StepName,WorkflowID,StepOrder,TimeLimitHours,ApprovalRequired,StatusID")] WorkflowStep workflowStep)
+        public async Task<IActionResult> Edit(int id, [Bind("StepID,StepName,WorkflowID,StepOrder,AssignedUserId,TimeLimitHours,ApprovalRequired,StatusID")] WorkflowStep workflowStep)
         {
             if (id != workflowStep.StepID)
             {
@@ -117,8 +152,22 @@ namespace Request.Areas.IRequest.Controllers
             {
                 try
                 {
+                    // Kiểm tra xem Workflow có tồn tại và đang active không
+                    var workflow = await _context.Workflows.FindAsync(workflowStep.WorkflowID);
+                    if (workflow == null || !workflow.IsActive)
+                    {
+                        ModelState.AddModelError("WorkflowID", "Quy trình không tồn tại hoặc đã bị vô hiệu hóa");
+                        var activeWorkflows = _context.Workflows
+                            .Where(w => w.IsActive)
+                            .OrderBy(w => w.WorkflowName)
+                            .ToList();
+                        ViewData["WorkflowID"] = new SelectList(activeWorkflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
+                        ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
+                        ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+                        return View(workflowStep);
+                    }
+
                     _context.Update(workflowStep);
-                    TempData["StatusMessage"] = "Cập nhật thành công!";
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -134,8 +183,13 @@ namespace Request.Areas.IRequest.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            var workflows = _context.Workflows
+                .Where(w => w.IsActive)
+                .OrderBy(w => w.WorkflowName)
+                .ToList();
+            ViewData["WorkflowID"] = new SelectList(workflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-            ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
+            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
             return View(workflowStep);
         }
 

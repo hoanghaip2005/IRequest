@@ -40,6 +40,43 @@
     </div>
 </div>
 
+<!-- Danh sách user thuộc phòng ban này -->
+@if (ViewBag.UsersInDepartment != null && ((List<App.Models.AppUser>)ViewBag.UsersInDepartment).Count > 0)
+{
+    <h5>Danh sách nhân viên thuộc phòng ban này:</h5>
+    <ul>
+        @foreach (var user in (List<App.Models.AppUser>)ViewBag.UsersInDepartment)
+        {
+            <li>@user.UserName (@user.Email)</li>
+        }
+    </ul>
+}
+else
+{
+    <p><i>Không có nhân viên nào thuộc phòng ban này.</i></p>
+}
+
+@if (ViewBag.UsersNotInDepartment != null && ((List<App.Models.AppUser>)ViewBag.UsersNotInDepartment).Count > 0)
+{
+    <form asp-action="AddUser" asp-route-departmentId="@Model.DepartmentID" method="post" class="mb-3">
+        <div class="form-group">
+            <label>Thêm nhân viên vào phòng ban:</label>
+            <select name="userId" class="form-control" required>
+                <option value="">-- Chọn nhân viên --</option>
+                @foreach (var user in (List<App.Models.AppUser>)ViewBag.UsersNotInDepartment)
+                {
+                    <option value="@user.Id">@user.UserName (@user.Email)</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success mt-2">Thêm vào phòng ban</button>
+    </form>
+}
+else
+{
+    <p><i>Không còn nhân viên nào chưa thuộc phòng ban.</i></p>
+}
+
 <div>
     <a asp-action="Index">Back to List</a>
 </div>

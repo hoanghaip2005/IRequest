@@ -213,11 +213,15 @@ namespace Request.Areas_IRequest_Controllers_
                 return NotFound();
             }
 
-            var department = await _context.Departments.FindAsync(id);
+            var department = await _context.Departments
+                .Include(d => d.Users)
+                .FirstOrDefaultAsync(d => d.DepartmentID == id);
             if (department == null)
             {
                 return NotFound();
             }
+            ViewBag.UsersInDepartment = department.Users.ToList();
+            ViewBag.UsersNotInDepartment = _context.Users.Where(u => u.DepartmentID == null).ToList();
             return View(department);
         }
 

@@ -89,23 +89,21 @@ namespace Request.Areas.IRequest.Controllers
         [AllowAnonymous]
         public IActionResult Create()
         {
-            var userId = _userManager.GetUserId(User);  // Lấy UserId từ người dùng đã đăng nhập
+            var userId = _userManager.GetUserId(User);
+            // Lấy user có vai trò admin
+            var adminUser = _userManager.GetUsersInRoleAsync("Administrator").Result.FirstOrDefault();
+            var defaultAssignedUserId = adminUser?.Id ?? _userManager.Users.FirstOrDefault()?.Id;
 
             var request = new RequestModel
             {
-                UsersId = userId  // Gán giá trị UserId từ người dùng đã đăng nhập
+                UsersId = userId,
+                AssignedUserId = defaultAssignedUserId
             };
 
-            // Cập nhật giá trị AssignedUserId nếu bạn muốn gán mặc định một người nào đó cho việc tạo yêu cầu
-            var defaultAssignedUserId = _userManager.Users.FirstOrDefault()?.Id;
-            request.AssignedUserId = defaultAssignedUserId;
-
-            // Truyền danh sách các mục lựa chọn vào ViewData để hiển thị trong dropdown
+            ViewBag.IsAdminOrMember = User.IsInRole("Administrator") || User.IsInRole("Member");
             ViewData["PriorityID"] = new SelectList(_context.Set<Priority>(), "PriorityID", "Description");
             ViewData["StatusID"] = new SelectList(_context.Set<Status>(), "StatusID", "StatusName");
-            ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>(), "WorkflowID", "WorkflowName");
-
-            // Lấy danh sách người dùng từ UserManager và gán vào ViewData["Users"]
+            ViewData["WorkflowID"] = new SelectList(_context.Set<Workflow>().Where(w => w.IsActive), "WorkflowID", "WorkflowName");
             ViewData["Users"] = new SelectList(_userManager.Users.ToList(), "Id", "UserName", request.AssignedUserId);
 
             return View(request);
@@ -143,19 +141,19 @@ namespace Request.Areas.IRequest.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("RequestID,Title,Description,AttachmentURL,IsApproved,StatusID,PriorityID,WorkflowID,UsersId,AssignedUserId")] RequestModel request)
         {
+            // Nếu thiếu AssignedUserId thì gán mặc định là admin
+            if (string.IsNullOrEmpty(request.AssignedUserId))
+            {
+                var adminUser = await _userManager.GetUsersInRoleAsync("Administrator");
+                request.AssignedUserId = adminUser.FirstOrDefault()?.Id ?? (await _userManager.Users.FirstOrDefaultAsync())?.Id;
+            }
+
             if (ModelState.IsValid)
             {
                 if (string.IsNullOrEmpty(request.UsersId))
                 {
                     TempData["ErrorMessage"] = "Không tìm thấy người dùng. Vui lòng đăng nhập.";
                     return RedirectToAction("Login", "Account");
-                }
-
-                // If AssignedUserId is empty, you may want to assign a default user (e.g., admin)
-                if (string.IsNullOrEmpty(request.AssignedUserId))
-                {
-                    TempData["ErrorMessage"] = "Bạn phải chọn người phụ trách yêu cầu.";
-                    return RedirectToAction("Create");
                 }
 
                 request.CreatedAt = DateTime.UtcNow;
@@ -168,6 +166,10 @@ namespace Request.Areas.IRequest.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Truyền lại các ViewData khi ModelState không hợp lệ
+            ViewData["WorkflowID"] = new SelectList(_context.Workflows.Where(w => w.IsActive), "WorkflowID", "WorkflowName", request.WorkflowID);
+            ViewData["PriorityID"] = new SelectList(_context.Set<Priority>(), "PriorityID", "Description", request.PriorityID);
+            ViewData["StatusID"] = new SelectList(_context.Set<Status>(), "StatusID", "StatusName", request.StatusID);
             ViewData["Users"] = new SelectList(await _userManager.Users.ToListAsync(), "Id", "UserName", request.AssignedUserId);
             return View(request);
         }
@@ -316,11 +318,24 @@ namespace Request.Areas.IRequest.Controllers
                 return RedirectToAction("Index");
             }
 
-            var requests = _context.Requests.Where(r => ids.Contains(r.RequestID));
-            _context.Requests.RemoveRange(requests);
-            await _context.SaveChangesAsync();
+            try
+            {
+                // First delete all associated comments
+                var comments = _context.Comments.Where(c => c.RequestId.HasValue && ids.Contains(c.RequestId.Value));
+                _context.Comments.RemoveRange(comments);
 
-            TempData["StatusMessage"] = "Deleted selected requests successfully.";
+                // Then delete the requests
+                var requests = _context.Requests.Where(r => ids.Contains(r.RequestID));
+                _context.Requests.RemoveRange(requests);
+
+                await _context.SaveChangesAsync();
+                TempData["StatusMessage"] = "Deleted selected requests successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the requests: " + ex.Message;
+            }
+
             return RedirectToAction("Index");
         }
         [HttpPost("/request/assign-multiple")]

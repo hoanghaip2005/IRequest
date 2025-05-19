@@ -6,7 +6,7 @@
 
 <div class="container-fluid">
     <div class="row mt-4" style="font-size: 1.2rem;">
-        <div class="mx-2">
+        <div class="mx-3">
             <span>Home</span>
             <span> / </span>
             <span>@ViewContext.RouteData.Values["controller"]</span>
@@ -14,48 +14,56 @@
             <span>@ViewContext.RouteData.Values["action"]</span>
         </div>
     </div>
-    <div class="row">
+    <div class="row md-4"></div>
         <h1 class="p-3 mt-0">@ViewData["Title"]</h1>
     </div>
-    <div class="row mb-4 mx-3"> 
-        <dl class="row">
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.StepName)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.StepName)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Workflow)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Workflow.WorkflowName)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.StepOrder)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.StepOrder)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.TimeLimitHours)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.TimeLimitHours)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.ApprovalRequired)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.ApprovalRequired)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.statsus)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.statsus.StatusName)
-            </dd>
-        </dl>
+    <div class="row md-4 mx-3">
+        <div class="col-md-4">
+            <dl class="row">
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.StepName)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.StepName)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.Workflow)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Workflow.WorkflowName)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.StepOrder)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.StepOrder)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.AssignedUser)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.AssignedUser.UserName)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.TimeLimitHours)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.TimeLimitHours)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.ApprovalRequired)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.ApprovalRequired)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.statsus)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.statsus.StatusName)
+                </dd>
+            </dl>
+        </div>
     </div>
     <div class="md-4 mx-4">
         <a asp-action="Edit" asp-route-id="@Model?.StatusID" class="btn btn-primary">Edit</a> |

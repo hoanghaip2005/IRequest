@@ -4,6 +4,7 @@ using App.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Request.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250519153326_AddAssignedUserToWorkflowStep")]
+    partial class AddAssignedUserToWorkflowStep
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,48 +271,6 @@ namespace Request.Migrations
                     b.HasIndex("WorkflowID");
 
                     b.ToTable("Requests");
-                });
-
-            modelBuilder.Entity("App.Models.IRequest.RequestHistory", b =>
-                {
-                    b.Property<int>("HistoryID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HistoryID"));
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RequestID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StepID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("HistoryID");
-
-                    b.HasIndex("RequestID");
-
-                    b.HasIndex("StepID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("RequestHistories", (string)null);
                 });
 
             modelBuilder.Entity("App.Models.IRequest.Status", b =>
@@ -644,33 +605,6 @@ namespace Request.Migrations
                     b.Navigation("Workflow");
                 });
 
-            modelBuilder.Entity("App.Models.IRequest.RequestHistory", b =>
-                {
-                    b.HasOne("App.Models.IRequest.Request", "Request")
-                        .WithMany("Histories")
-                        .HasForeignKey("RequestID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("App.Models.IRequest.WorkflowStep", "WorkflowStep")
-                        .WithMany()
-                        .HasForeignKey("StepID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("App.Models.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Request");
-
-                    b.Navigation("User");
-
-                    b.Navigation("WorkflowStep");
-                });
-
             modelBuilder.Entity("App.Models.IRequest.Workflow", b =>
                 {
                     b.HasOne("App.Models.IRequest.Priority", "Priority")
@@ -780,8 +714,6 @@ namespace Request.Migrations
             modelBuilder.Entity("App.Models.IRequest.Request", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("Histories");
                 });
 
             modelBuilder.Entity("App.Models.IRequest.Status", b =>

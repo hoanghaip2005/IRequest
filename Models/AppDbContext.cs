@@ -81,6 +81,28 @@ namespace App.Models
                 .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Cấu hình cho RequestHistory
+            modelBuilder.Entity<RequestHistory>(entity =>
+            {
+                entity.ToTable("RequestHistories");
+                entity.HasKey(rh => rh.HistoryID);
+
+                entity.HasOne(rh => rh.Request)
+                    .WithMany(r => r.Histories)
+                    .HasForeignKey(rh => rh.RequestID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(rh => rh.WorkflowStep)
+                    .WithMany()
+                    .HasForeignKey(rh => rh.StepID)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(rh => rh.User)
+                    .WithMany()
+                    .HasForeignKey(rh => rh.UserID)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
         // public DbSet<Contact> Contacts { get; set; } 
         public DbSet<App.Models.IRequest.Request> Requests { get; set; }
@@ -92,5 +114,6 @@ namespace App.Models
         public DbSet<Department> Departments { get; set; }
 
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<RequestHistory> RequestHistories { get; set; }
     }
 }

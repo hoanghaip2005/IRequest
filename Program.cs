@@ -3,6 +3,7 @@ using App.ExtendMethods;
 using App.Models;
 using App.Models.IRequest;
 using App.Services;
+using Request.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -94,6 +95,10 @@ builder.Services.AddAuthorization(options => {
         builder.RequireRole(RoleName.Administrator);
     });
 });
+
+// Đăng ký RequestHistoryService
+builder.Services.AddScoped<RequestHistoryService>();
+builder.Services.AddHostedService<RequestHistoryBackgroundService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

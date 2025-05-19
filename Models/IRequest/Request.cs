@@ -63,5 +63,12 @@ namespace App.Models.IRequest
         public DateTime? ClosedAt { get; set; }
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<RequestHistory> Histories { get; set; } = new HashSet<RequestHistory>();
+
+        public Request()
+        {
+            Comments = new HashSet<Comment>();
+            Histories = new HashSet<RequestHistory>();
+        }
     }
 }

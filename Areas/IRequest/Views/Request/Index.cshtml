@@ -196,7 +196,15 @@
                                         </span>
                                     </td>
                                 <td class="desc-value">@Html.DisplayFor(modelItem => item.Description)</td>
-                                <td class="assignee-value">@Html.DisplayFor(modelItem => item.User.UserName)</td>
+                                <td class="assignee-value">
+                                    @item.User?.UserName
+                                    @if (item.User?.Department != null)
+                                    {
+                                        <span class="ms-2 badge bg-info" title="@item.User.Department.Name">
+                                            @item.User.Department.Name
+                                        </span>
+                                    }
+                                </td>
                                 <td>
                                     @if (item.AssignedUser != null)
                                         {
@@ -213,7 +221,14 @@
                                             <span>No User Assigned</span>
                                         }
                                     </td>
-                                    <td class="status-value">@Html.DisplayFor(modelItem => item.Status.StatusName)</td>
+                                    <td class="status-value">
+                                        @if (item.Status != null)
+                                        {
+                                            <span class="badge @(item.Status.StatusName == "In Progress" ? "bg-warning text-dark" : item.Status.StatusName == "Approved" ? "bg-success" : "bg-secondary")">
+                                                @item.Status.StatusName
+                                            </span>
+                                        }
+                                    </td>
                                     <td class="priority-value">@Html.DisplayFor(modelItem => item.CreatedAt)</td>
                                     <td>
                                         @if (isApproved && resolutionDeadline != null)

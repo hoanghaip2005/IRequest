@@ -200,6 +200,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcVmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Comment/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcQ29tbWVudFxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Comment/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcQ29tbWVudFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Workspace/C\#/Request/Areas/IRequest/Views/Department/AddUser.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcRGVwYXJ0bWVudFxBZGRVc2VyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -270,6 +278,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/ViewHome.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxWaWV3SG9tZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/_CommentListPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxfQ29tbWVudExpc3RQYXJ0aWFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Workspace/C\#/Request/Areas/IRequest/Views/Status/Create.cshtml]

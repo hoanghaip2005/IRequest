@@ -17,7 +17,7 @@ namespace Request.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -102,6 +102,41 @@ namespace Request.Migrations
                     b.HasIndex("RolesId");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("App.Models.IRequest.Comment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("App.Models.IRequest.Department", b =>
@@ -497,6 +532,25 @@ namespace Request.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("App.Models.IRequest.Comment", b =>
+                {
+                    b.HasOne("App.Models.IRequest.Request", "Request")
+                        .WithMany("Comments")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("App.Models.AppUser", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Request");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("App.Models.IRequest.Department", b =>
                 {
                     b.HasOne("App.Models.AppUser", "AssignedUser")
@@ -626,6 +680,8 @@ namespace Request.Migrations
 
             modelBuilder.Entity("App.Models.AppUser", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("Requests");
                 });
 
@@ -639,6 +695,11 @@ namespace Request.Migrations
                     b.Navigation("Requests");
 
                     b.Navigation("Workflows");
+                });
+
+            modelBuilder.Entity("App.Models.IRequest.Request", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("App.Models.IRequest.Status", b =>

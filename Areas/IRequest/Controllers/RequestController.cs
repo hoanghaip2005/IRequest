@@ -37,6 +37,8 @@ namespace Request.Areas.IRequest.Controllers
                                     .Include(r => r.Status)        // Bao gồm trạng thái
                                     .Include(r => r.Priority)      // Bao gồm độ ưu tiên
                                     .Include(r => r.User)          // Bao gồm người gửi yêu cầu
+                                    .Include(r => r.Comments)      // Bao gồm comments
+                                        .ThenInclude(c => c.User)  // Bao gồm thông tin người comment
                                     .AsQueryable();
 
             // Nếu không phải admin thì chỉ lấy request của user hiện tại
@@ -388,6 +390,48 @@ namespace Request.Areas.IRequest.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, "Internal server error: " + ex.Message + " - " + ex.StackTrace);
+            }
+        }
+
+        [HttpPost("/request/add-comment")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment([FromForm] int requestId, [FromForm] string comment)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(comment))
+                    return BadRequest("Comment cannot be empty");
+
+                var request = await _context.Requests.FindAsync(requestId);
+                if (request == null)
+                    return NotFound("Request not found");
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                    return Unauthorized();
+
+                var newComment = new Comment
+                {
+                    RequestId = requestId,
+                    UserId = currentUser.Id,
+                    Content = comment,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Comments.Add(newComment);
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    userName = currentUser.UserName,
+                    comment = comment,
+                    createdAt = newComment.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding comment");
+                return StatusCode(500, "Internal server error");
             }
         }
     }

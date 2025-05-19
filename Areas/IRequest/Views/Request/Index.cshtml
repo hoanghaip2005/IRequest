@@ -268,6 +268,47 @@
                             </div>
                         </div>
 
+                        <!-- Card: Comments -->
+                        <div class="card mb-3 p-3" style="border-radius:12px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="fw-bold">Comments</div>
+                                <button class="btn btn-sm btn-outline-primary" id="addCommentBtn-@item.RequestID">
+                                    <i class="fa-regular fa-comment"></i> Add comment
+                                </button>
+                            </div>
+                            <div class="comments-container" id="commentsContainer-@item.RequestID">
+                                @if (item.Comments != null && item.Comments.Any())
+                                {
+                                    foreach (var comment in item.Comments.OrderByDescending(c => c.CreatedAt))
+                                    {
+                                        <div class="comment-item mb-3">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <div class="me-2">
+                                                    <i class="fa-regular fa-user-circle fa-lg"></i>
+                                                </div>
+                                                <div>
+                                                    <b>@comment.User.UserName</b>
+                                                    <span class="text-muted ms-2" style="font-size:12px;">@comment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                                </div>
+                                            </div>
+                                            <div class="comment-text ms-4">@comment.Content</div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-muted" style="font-size:13px;">No comments yet</div>
+                                }
+                            </div>
+                            <div class="comment-form mt-3" id="commentForm-@item.RequestID" style="display:none;">
+                                <textarea class="form-control mb-2" rows="3" placeholder="Write a comment..."></textarea>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-light btn-sm" id="cancelCommentBtn-@item.RequestID">Cancel</button>
+                                    <button class="btn btn-primary btn-sm" id="submitCommentBtn-@item.RequestID">Comment</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Card: Similar requests -->
                         <div class="card mb-3 p-3" style="border-radius:12px;">
                             <div class="fw-bold">Similar requests</div>
@@ -632,6 +673,86 @@
                 // Chuyển hướng đến trang Details của request đầu tiên được chọn
                 window.location.href = '/request/details/' + selectedIds[0];
             });
+
+            // Comment functionality
+            $(document).on('click', '[id^=addCommentBtn-]', function() {
+                const requestId = $(this).attr('id').split('-')[1];
+                $(`#commentForm-${requestId}`).show();
+            });
+
+            $(document).on('click', '[id^=cancelCommentBtn-]', function() {
+                const requestId = $(this).attr('id').split('-')[1];
+                $(`#commentForm-${requestId}`).hide();
+            });
+
+            $(document).on('click', '[id^=submitCommentBtn-]', function() {
+                const requestId = $(this).attr('id').split('-')[1];
+                const commentText = $(`#commentForm-${requestId} textarea`).val();
+                
+                if (!commentText.trim()) {
+                    alert('Please enter a comment');
+                    return;
+                }
+
+                // Disable submit button and show loading state
+                const $submitBtn = $(this);
+                const originalText = $submitBtn.text();
+                $submitBtn.prop('disabled', true).text('Adding...');
+
+                // Send comment to server
+                $.ajax({
+                    url: '/request/add-comment',
+                    method: 'POST',
+                    data: {
+                        requestId: requestId,
+                        comment: commentText,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        // Add new comment to container
+                        const commentHtml = `
+                            <div class="comment-item mb-3">
+                                <div class="d-flex align-items-center mb-1">
+                                    <div class="me-2">
+                                        <i class="fa-regular fa-user-circle fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <b>${response.userName}</b>
+                                        <span class="text-muted ms-2" style="font-size:12px;">${response.createdAt}</span>
+                                    </div>
+                                </div>
+                                <div class="comment-text ms-4">${response.comment}</div>
+                            </div>
+                        `;
+                        
+                        const $container = $(`#commentsContainer-${requestId}`);
+                        if ($container.find('.text-muted').length) {
+                            $container.empty();
+                        }
+                        $container.prepend(commentHtml);
+                        
+                        // Clear and hide form
+                        $(`#commentForm-${requestId} textarea`).val('');
+                        $(`#commentForm-${requestId}`).hide();
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Failed to add comment';
+                        if (xhr.responseText) {
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                errorMessage = response.message || errorMessage;
+                            } catch (e) {
+                                errorMessage = xhr.responseText;
+                            }
+                        }
+                        alert(errorMessage);
+                    },
+                    complete: function() {
+                        // Re-enable submit button
+                        $submitBtn.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
         });
     </script>
 }
@@ -848,6 +969,47 @@
         font-weight: 600;
         border-radius: 8px;
         padding: 4px 10px;
+    }
+
+    /* Comment styles */
+    .comment-item {
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 12px;
+    }
+
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+
+    .comment-text {
+        color: #333;
+        font-size: 14px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .btn-outline-primary {
+        border-color: #1976d2;
+        color: #1976d2;
+        font-size: 12px;
+        padding: 4px 12px;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #1976d2;
+        color: white;
+    }
+
+    .comment-form textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        resize: vertical;
+        font-size: 14px;
+    }
+
+    .comment-form textarea:focus {
+        border-color: #1976d2;
+        box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
     }
 </style>
 

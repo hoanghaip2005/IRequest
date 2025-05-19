@@ -1,8 +1,9 @@
 // Controller: UserController
-using System.Data.Entity.Infrastructure;
+// using System.Data.Entity.Infrastructure;
 using App.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 public class UserController : Controller
 {

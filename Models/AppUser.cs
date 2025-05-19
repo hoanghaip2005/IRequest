@@ -18,5 +18,7 @@ namespace App.Models
         public Department? Department { get; set; }
 
         public ICollection<App.Models.IRequest.Request> Requests { get; set; } = new HashSet<App.Models.IRequest.Request>();
+
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

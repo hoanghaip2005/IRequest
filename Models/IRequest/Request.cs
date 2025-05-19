@@ -55,13 +55,13 @@ namespace App.Models.IRequest
         [ForeignKey("AssignedUserId")]
         public AppUser? AssignedUser { get; set; }
 
-
-
         [Display(Name = "Ngày tạo")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         [Display(Name = "Ngày cập nhật")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? ClosedAt { get; set; }
+
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

@@ -1,0 +1,17 @@
+@model App.Models.IRequest.Comment
+
+@{
+    ViewData["Title"] = "Add Comment";
+}
+
+<h2>Add Comment</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="RequestId" value="@ViewBag.RequestId" />
+    <div class="mb-2">
+        <label for="Content">Content</label>
+        <input type="text" class="form-control" name="Content" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Add Comment</button>
+</form>

@@ -1,0 +1,32 @@
+@model IEnumerable<App.Models.IRequest.Comment>
+
+@{
+    ViewData["Title"] = "Danh Sách Bình Luận";
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.CommentId)</th>
+            <th>@Html.DisplayNameFor(model => model.Content)</th>
+            <th>@Html.DisplayNameFor(model => model.CreatedAt)</th>
+            <th>@Html.DisplayNameFor(model => model.Request)</th>
+            <th>@Html.DisplayNameFor(model => model.User)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var comment in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => comment.CommentId)</td>
+                <td>@Html.DisplayFor(modelItem => comment.Content)</td>
+                <td>@Html.DisplayFor(modelItem => comment.CreatedAt)</td>
+                <td>@Html.DisplayFor(modelItem => comment.Request.Title)</td>
+                <td>@Html.DisplayFor(modelItem => comment.User.UserName)</td>
+                <td>
+                    <a asp-area="IRequest" asp-controller="Comment" asp-action="Create" asp-route-requestId="@comment.RequestId">Add Comment</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

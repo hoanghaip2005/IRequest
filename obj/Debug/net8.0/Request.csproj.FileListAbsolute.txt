@@ -1,0 +1,9 @@
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.csproj.AssemblyReference.cache
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.GeneratedMSBuildEditorConfig.editorconfig
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.AssemblyInfoInputs.cache
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.AssemblyInfo.cs
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.csproj.CoreCompileInputs.cache
+C:\Workspace\C#\Request\obj\Debug\net8.0\App.MvcApplicationPartsAssemblyInfo.cache
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.RazorAssemblyInfo.cache
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.RazorAssemblyInfo.cs
+C:\Workspace\C#\Request\obj\Debug\net8.0\Request.sourcelink.json

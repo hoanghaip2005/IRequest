@@ -69,6 +69,18 @@ namespace App.Models
                 .WithMany(d => d.Users)     // Một Department có nhiều AppUser
                 .HasForeignKey(u => u.DepartmentID)  // Khóa ngoại từ AppUser đến Department
                 .OnDelete(DeleteBehavior.SetNull); 
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Request)
+                .WithMany(r => r.Comments)
+                .HasForeignKey(c => c.RequestId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
         // public DbSet<Contact> Contacts { get; set; } 
         public DbSet<App.Models.IRequest.Request> Requests { get; set; }
@@ -78,5 +90,7 @@ namespace App.Models
         public DbSet<Priority> Priorities { get; set; }
         public DbSet<Workflow> Workflows { get; set; }
         public DbSet<Department> Departments { get; set; }
+
+        public DbSet<Comment> Comments { get; set; }
     }
 }

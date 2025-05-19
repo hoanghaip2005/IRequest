@@ -63,8 +63,7 @@ namespace App.Area.Database.Controllers
                 }
             }
 
-            // admin, pass = admin123, admin@example.com
-
+            // Tạo tài khoản admin
             var useradmin = await _userManager.FindByNameAsync("admin");
             if (useradmin == null)
             {
@@ -74,12 +73,52 @@ namespace App.Area.Database.Controllers
                     Email = "admin@example.com",
                     EmailConfirmed = true,
                 };
-            
                 await _userManager.CreateAsync(useradmin, "admin123");
                 await _userManager.AddToRoleAsync(useradmin, RoleName.Administrator);
             }
 
-            StatusMessage = "Vua seed database";
+            var userEditor = await _userManager.FindByNameAsync("Editor");
+            if (userEditor == null)
+            {
+                userEditor = new AppUser()
+                {
+                    UserName = "editor",
+                    Email = "editor@example.com",
+                    EmailConfirmed = true,
+                };
+                await _userManager.CreateAsync(userEditor, "admin123");
+                await _userManager.AddToRoleAsync(userEditor, RoleName.Administrator);
+            }
+
+            // Tạo tài khoản nhân viên phê duyệt
+            var userApprover = await _userManager.FindByNameAsync("approver");
+            if (userApprover == null)
+            {
+                userApprover = new AppUser()
+                {
+                    UserName = "approver",
+                    Email = "approver@example.com",
+                    EmailConfirmed = true,
+                };
+                await _userManager.CreateAsync(userApprover, "approver123");
+                await _userManager.AddToRoleAsync(userApprover, RoleName.Approver);
+            }
+
+            // Tạo tài khoản trưởng phòng
+            var userManager = await _userManager.FindByNameAsync("manager");
+            if (userManager == null)
+            {
+                userManager = new AppUser()
+                {
+                    UserName = "manager",
+                    Email = "manager@example.com",
+                    EmailConfirmed = true,
+                };
+                await _userManager.CreateAsync(userManager, "manager123");
+                await _userManager.AddToRoleAsync(userManager, RoleName.Manager);
+            }
+
+            StatusMessage = "Đã tạo xong các tài khoản mẫu";
             return RedirectToAction(nameof(Index));
         }
     }

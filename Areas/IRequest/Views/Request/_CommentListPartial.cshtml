@@ -1,0 +1,40 @@
+@model IEnumerable<App.Models.IRequest.Comment>
+
+<div class="comment-list">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var comment in Model)
+        {
+            <div class="comment-item mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar me-2">
+                            <i class="fas fa-user-circle fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <span class="fw-bold me-2">@(comment.User?.UserName ?? "No user")</span>
+                                @if (comment.User?.Department != null)
+                                {
+                                    <span class="badge bg-info text-dark" style="font-size:11px;">
+                                        @(comment.User.Department.Name ?? "No department")
+                                    </span>
+                                }
+                            </div>
+                            <small class="text-muted">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-content mt-2">
+                    <p class="mb-0" style="font-size:13px;">@(comment.Content ?? "No content")</p>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-muted text-center py-3">
+            <i class="fas fa-comments"></i> No comments yet
+        </div>
+    }
+</div>

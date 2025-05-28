@@ -1,0 +1,1405 @@
+@model App.Models.IRequest.MyTasksViewModel
+
+@{
+    ViewData["Title"] = "Danh sách yêu cầu cần xử lý";
+}
+
+<style>
+.kanban-board {
+    padding: 30px 4px;
+    min-height: 80vh;
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    overflow-x: hidden;
+}
+.kanban-column {
+    min-height: 70vh;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.07);
+    margin: 0;
+    padding: 0px;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    width: calc(33.333% - 11px); /* Account for gap */
+}
+.kanban-column .card {
+    border-radius: inherit;
+    height: 100%;
+    margin: 0 !important;
+    border: none;
+}
+.kanban-column .card-header {
+    border-radius: 16px 16px 0 0;
+    font-weight: bold;
+    text-align: left;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    border: none;
+}
+.kanban-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    border: none !important;
+    background: #fff;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+.kanban-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+    background: #f0f8ff;
+}
+.kanban-card .fw-bold {
+    font-size: 1.15rem;
+    text-align: left !important;
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.kanban-card .badge {
+    font-size: 0.97em;
+    margin-bottom: 6px;
+    margin-right: 4px;
+}
+.kanban-card .small {
+    margin-bottom: 2px;
+}
+.kanban-card .btn-info {
+    width: auto;
+    min-width: 90px;
+    float: right;
+    margin-top: 8px;
+    margin-right: 4px;
+    font-size: 0.97em;
+    padding: 4px 16px;
+    border-radius: 8px;
+}
+.kanban-card .btn-info i {
+    margin-right: 4px;
+}
+
+.kanban-card .approve-btn {
+    background-color: #AEEA94 !important ;
+    color: #fff;
+}
+
+.kanban-card .reject-btn {
+    background-color: #FF6B6B !important;
+    color: #fff !important;
+}
+
+.kanban-card .detail-btn {
+    background-color: #F79B72 !important;
+    color: #fff !important;
+}
+
+.modal-overlay {
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.25);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    overflow-y: auto;
+}
+
+body.modal-open {
+    overflow: hidden;
+    padding-right: 17px; /* Width of scrollbar */
+}
+
+.modal-backdrop {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-overlay.show .modal-backdrop {
+    opacity: 1;
+}
+
+.modal-card {
+    position: relative;
+    z-index: 2;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    padding: 36px 32px 28px 32px;
+    min-width: 340px;
+    max-width: 95vw;
+    width: 480px;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-overlay.show .modal-card {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 12px; right: 18px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #888;
+    cursor: pointer;
+    z-index: 3;
+    transition: color 0.15s;
+}
+.close-modal-btn:hover { color: #e74c3c; }
+
+.jira-modal-card {
+    max-width: 900px;
+    width: 95vw;
+    min-width: 320px;
+    padding: 0;
+    overflow: hidden;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-overlay.show .jira-modal-card {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.jira-modal-content {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    min-height: 340px;
+}
+.jira-modal-main {
+    flex: 2;
+    padding: 36px 32px 28px 32px;
+    background: #fff;
+    border-right: 1px solid #f0f0f0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+.jira-modal-side {
+    flex: 1;
+    padding: 36px 24px 28px 24px;
+    background: #f8fafc;
+    min-width: 0;
+    border-radius: 0 18px 18px 0;
+}
+@@media (max-width: 700px) {
+    .jira-modal-content { flex-direction: column; }
+    .jira-modal-main, .jira-modal-side { border: none; border-radius: 0; padding: 24px 12px; }
+}
+
+/* Toast Notification Styles */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+}
+
+.toast-notification.show {
+    transform: translateX(0);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-content i {
+    color: #4CAF50;
+    font-size: 24px;
+}
+
+.toast-message {
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: #4CAF50;
+    animation: progress 3s linear forwards;
+}
+
+@@keyframes progress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+@@keyframes slideIn {
+    from { transform: translateX(120%); }
+    to { transform: translateX(0); }
+}
+
+@@keyframes slideOut {
+    from { transform: translateX(0); }
+    to { transform: translateX(120%); }
+}
+
+.comments-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.comments-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.comments-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.comments-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.comments-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.comment-item {
+    padding: 8px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    margin-bottom: 12px;
+}
+
+.comment-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.btn-add-info {
+    background: linear-gradient(90deg, #ffb347 0%, #ffcc33 100%);
+    color: #fff !important;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 204, 51, 0.15);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-add-info:hover {
+    background: linear-gradient(90deg, #ff9800 0%, #ffd700 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(255, 204, 51, 0.25);
+}
+.btn-detail {
+    background: #F79B72 !important;
+    color: #fff !important;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+}
+</style>
+
+<div class="container-fluid">
+    <div class="row mt-4" style="font-size: 1.2rem;">
+        <div class="mx-2">
+            <span>Home</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["controller"]</span>
+            <span> / </span>
+            <span>@ViewContext.RouteData.Values["action"]</span>
+        </div>
+    </div>
+    <div class="row">
+        <h1 class="p-3 mt-0">@ViewData["Title"]</h1>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-board" style="min-height: 70vh;">
+        <!-- To Do Column -->
+        <div class="kanban-column">
+            <div class="card mb-3">
+                <div class="card-header" style="background-color: #FFF574;">
+                    <h5 class="mb-0">TO DO <span class="badge bg-info">@Model.MySubmittedRequests?.Count()</span></h5>
+                </div>
+                <div class="card-body p-2" style="min-height: 60vh;">
+                    @if (Model.MySubmittedRequests != null && Model.MySubmittedRequests.Any())
+                    {
+                        foreach (var item in Model.MySubmittedRequests)
+                        {
+                            <div class="kanban-card" 
+                                data-response-time="@item.Priority?.ResponseTime"
+                                data-resolution-time="@item.Priority?.ResolutionTime"
+                                data-description="@item.Description"
+                                data-reporter="@item.User.UserName"
+                                data-reporter-email="@item.User.Email">
+                                <span class="fw-bold">@item.Title</span>
+                                <span class="badge bg-@(item.Priority?.Description?.ToLower() == "high" ? "danger" : item.Priority?.Description?.ToLower() == "medium" ? "warning" : "info")">@item.Priority?.PriorityName</span>
+                                <span class="badge bg-@(item.Status?.StatusName?.ToLower() == "approved" ? "success" : 
+                                                    item.Status?.StatusName?.ToLower() == "rejected" ? "danger" : 
+                                                    item.Status?.StatusName?.ToLower() == "need more info" ? "warning" : 
+                                                    "info")">@item.Status?.StatusName</span>
+                                <div class="small text-muted">ID: @item.RequestID</div>
+                                <div class="small">Ngày tạo: @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                    @if (item.IsAdditionalInfoRequested)
+                                    {
+                                        <a href="javascript:void(0)" class="btn btn-add-info btn-sm" onclick="openAdditionalInfoModal('@item.Status?.StatusName', '@item.Description')" data-request-id="@item.RequestID"><i class="fas fa-plus-circle"></i> Bổ sung thông tin</a>
+                                    }
+                                    <a href="javascript:void(0)" class="btn btn-detail btn-sm detail-btn"><i class="fas fa-eye"></i> Chi tiết</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted mt-4">Không có yêu cầu</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <!-- In Progress Column -->
+        <div class="kanban-column">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white" style="background-color: #FF8383 !important;">
+                    <h5 class="mb-0">IN PROGRESS <span class="badge bg-light text-primary">@(Model.RequestsToProcess?.Count() + Model.AssignedRequests?.Count())</span></h5>
+                </div>
+                <div class="card-body p-2" style="min-height: 60vh;">
+                    @if ((Model.RequestsToProcess != null && Model.RequestsToProcess.Any()) || (Model.AssignedRequests != null && Model.AssignedRequests.Any()))
+                    {
+                        @if (Model.RequestsToProcess != null)
+                        {
+                            foreach (var item in Model.RequestsToProcess)
+                            {
+                                var currentStep = item.Workflow?.Steps?.FirstOrDefault(s => s.StepOrder == item.CurrentStepOrder);
+                                <div class="kanban-card"
+                                    data-response-time="@item.Priority?.ResponseTime"
+                                    data-resolution-time="@item.Priority?.ResolutionTime"
+                                    data-description="@item.Description"
+                                    data-reporter="@item.User.UserName"
+                                    data-reporter-email="@item.User.Email">
+                                    <span class="fw-bold">@item.Title</span>
+                                    <span class="badge bg-@(item.Priority?.Description?.ToLower() == "high" ? "danger" : item.Priority?.Description?.ToLower() == "medium" ? "warning" : "info")">@item.Priority?.PriorityName</span>
+                                    <span class="badge bg-@(item.Status?.StatusName?.ToLower() == "closed" ? "danger" : item.Status?.StatusName?.ToLower() == "approved" ? "success" : "warning")">@item.Status?.StatusName</span>
+                                    <div class="small text-muted">ID: @item.RequestID</div>
+                                    <div class="small">Bước hiện tại: @(item.CurrentStepOrder > 0 ? item.CurrentStepOrder.ToString() : "Chưa bắt đầu") - @currentStep?.StepName</div>
+                                    <div class="small">Ngày tạo: @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm detail-btn"><i class="fas fa-eye"></i>Chi tiết</a>
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm approve-btn" data-request-id="@item.RequestID"><i class="fas fa-check"></i> Phê duyệt</a>
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm reject-btn" data-request-id="@item.RequestID"><i class="fas fa-times"></i> Từ chối</a>
+                                </div>
+                            }
+                        }
+                        @if (Model.AssignedRequests != null)
+                        {
+                            foreach (var item in Model.AssignedRequests)
+                            {
+                                var currentStep = item.Workflow?.Steps?.FirstOrDefault(s => s.StepOrder == item.CurrentStepOrder);
+                                <div class="kanban-card"
+                                    data-response-time="@item.Priority?.ResponseTime"
+                                    data-resolution-time="@item.Priority?.ResolutionTime"
+                                    data-description="@item.Description"
+                                    data-reporter="@item.User.UserName"
+                                    data-reporter-email="@item.User.Email">
+                                    <span class="fw-bold">@item.Title</span>
+                                    <span class="badge bg-@(item.Priority?.Description?.ToLower() == "high" ? "danger" : item.Priority?.Description?.ToLower() == "medium" ? "warning" : "info")">@item.Priority?.PriorityName</span>
+                                    <span class="badge bg-@(item.Status?.StatusName?.ToLower() == "closed" ? "danger" : item.Status?.StatusName?.ToLower() == "approved" ? "success" : "warning")">@item.Status?.StatusName</span>
+                                    <div class="small text-muted">ID: @item.RequestID</div>
+                                    <div class="small">Bước hiện tại: @(item.CurrentStepOrder > 0 ? item.CurrentStepOrder.ToString() : "Chưa bắt đầu") - @currentStep?.StepName</div>
+                                    <div class="small">Ngày tạo: @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm detail-btn"><i class="fas fa-eye"></i>Chi tiết</a>
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm approve-btn" data-request-id="@item.RequestID"><i class="fas fa-check"></i> Phê duyệt</a>
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm reject-btn" data-request-id="@item.RequestID"><i class="fas fa-times"></i> Từ chối</a>
+                                </div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted mt-4">Không có yêu cầu</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <!-- Done Column -->
+        <div class="kanban-column">
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white" style="background-color: #A1D6CB !important;">
+                    <h5 class="mb-0">DONE <span class="badge bg-light text-success">@Model.RequestsWaitingForOthers?.Count()</span></h5>
+                </div>
+                <div class="card-body p-2" style="min-height: 60vh;">
+                    @if (Model.RequestsWaitingForOthers != null && Model.RequestsWaitingForOthers.Any())
+                    {
+                        foreach (var item in Model.RequestsWaitingForOthers)
+                        {
+                            var currentStep = item.Workflow?.Steps?.FirstOrDefault(s => s.StepOrder == item.CurrentStepOrder);
+                            <div class="kanban-card"
+                                data-response-time="@item.Priority?.ResponseTime"
+                                data-resolution-time="@item.Priority?.ResolutionTime"
+                                data-description="@item.Description"
+                                data-assignee="@item.AssignedUser?.UserName ?? "--""
+                                data-reporter="@item.User.UserName"
+                                data-reporter-email="@item.User.Email">
+                                <span class="fw-bold">@item.Title</span>
+                                <span class="badge bg-@(item.Priority?.Description?.ToLower() == "high" ? "danger" : item.Priority?.Description?.ToLower() == "medium" ? "warning" : "info")">@item.Priority?.PriorityName</span>
+                                <span class="badge bg-@(item.Status?.StatusName?.ToLower() == "approved" ? "success" : item.Status?.StatusName?.ToLower() == "rejected" ? "danger" : "warning")">@item.Status?.StatusName</span>
+                                <div class="small text-muted">ID: @item.RequestID</div>
+                                <div class="small">Bước hiện tại: @(item.CurrentStepOrder > 0 ? item.CurrentStepOrder.ToString() : "Chưa bắt đầu") - @currentStep?.StepName</div>
+                                <div class="small">Ngày tạo: @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                <a href="javascript:void(0)" class="btn btn-info btn-sm detail-btn"><i class="fas fa-eye"></i>Chi tiết</a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted mt-4">Không có yêu cầu</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal overlay for request details -->
+<div id="requestDetailModal" class="modal-overlay" style="display:none;">
+    <div class="modal-backdrop" onclick="closeRequestModal()"></div>
+    <div class="modal-card jira-modal-card">
+        <button type="button" class="close-modal-btn" onclick="closeRequestModal()">&times;</button>
+        <div class="jira-modal-content">
+            <!-- Left column -->
+            <div class="jira-modal-main">
+                <!-- Tiêu đề lớn -->
+                <h4 id="modalTitle" class="mb-3">Request Title</h4>
+                <!-- Card: Reporter + Description -->
+                <div class="card mb-3 p-3" style="border-radius:12px;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fa-regular fa-user-circle fa-2x me-2"></i>
+                        <div>
+                            <b id="modalReporter"></b>
+                            <span class="text-muted" id="modalReporterEmail"></span>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <a href="#" style="font-size:13px;">View request in portal</a>
+                    </div>
+                    <div class="mb-2">
+                        <div class="fw-bold">Description</div>
+                        <div id="modalDescription">No description</div>
+                    </div>
+                </div>
+                <!-- Card: Comments -->
+                <div class="card mb-3 p-3" style="border-radius:12px;">
+                    <div class="fw-bold mb-2">Activity</div>
+                    <div class="comments-container" id="modalComments">
+                        <div class="text-muted" style="font-size:13px;">No comments yet</div>
+                    </div>
+                    <div class="comment-form mt-3" style="display: none;">
+                        <textarea class="form-control mb-2" rows="3" placeholder="Add a comment..."></textarea>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelComment()">Cancel</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="submitComment()">Comment</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-link btn-sm p-0 mt-2" onclick="showCommentForm()">
+                        <i class="fas fa-comment"></i> Add comment
+                    </button>
+                </div>
+            </div>
+            <!-- Right column -->
+            <div class="jira-modal-side">
+                <!-- Card: SLAs -->
+                <div class="card mb-3 p-3" style="border-radius:12px;">
+                    <div class="fw-bold mb-2">SLAs</div>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="me-2">--</span>
+                        <span class="badge bg-danger me-2"><i class="fa-solid fa-pause"></i></span>
+                        <span class="text-muted" style="font-size:13px;">Time to first response within --h</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-2">--</span>
+                        <span class="badge bg-danger me-2"><i class="fa-solid fa-pause"></i></span>
+                        <span class="text-muted" style="font-size:13px;">Time to resolution within --h</span>
+                    </div>
+                </div>
+                <!-- Card: Details -->
+                <div class="card mb-3 p-3" style="border-radius:12px;">
+                    <div class="fw-bold mb-2">Details</div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-4 me-2 mb-2">Assignee</span>
+                        <span class="text-muted" style="font-size:13px;" id="modalAssignee">--</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-4 me-2 mb-2">Reporter</span>
+                        <span class="text-muted" style="font-size:13px;" id="modalReporter2">--</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-4 me-2 mb-2">Priority</span>
+                        <span class="text-muted" style="font-size:13px;" id="modalPriority">--</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-4 me-2 mb-2">Status</span>
+                        <span class="text-muted" style="font-size:13px;" id="modalStatus">--</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-4 me-2 mb-2">Created</span>
+                        <span class="text-muted" style="font-size:13px;" id="modalCreated">--</span>
+                    </div>
+                </div>
+                <!-- Card: More fields -->
+                <div class="card mb-3 p-3" style="border-radius:12px;">
+                    <div class="fw-bold mb-2">More fields</div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-6 me-2 mb-2">Request participants</span>
+                        <span class="text-muted" style="font-size:13px;">None</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-6 me-2 mb-2">Approvers</span>
+                        <span class="text-muted" style="font-size:13px;">None</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="col-6 me-2 mb-2">Organizations</span>
+                        <span class="text-muted" style="font-size:13px;">None</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Approve Popup -->
+<div id="approveModal" class="modal-overlay" style="display:none;">
+    <div class="modal-backdrop" onclick="closeApproveModal()"></div>
+    <div class="modal-card" style="max-width:600px;">
+        <button type="button" class="close-modal-btn" onclick="closeApproveModal()">&times;</button>
+        <h4 class="mb-3" id="approveTitle">Phê duyệt yêu cầu</h4>
+        <div class="mb-2 text-muted" id="approveStatus"></div>
+        <div class="mb-2" id="approveDescription"></div>
+        
+        <div class="mb-3">
+            <label for="approveResolution" class="form-label">Resolution</label>
+            <select id="approveResolution" class="form-select">
+                <option value="">Chọn resolution...</option>
+                <option value="Done">Done</option>
+                <option value="Won't Do">Won't Do</option>
+                <option value="Duplicate">Duplicate</option>
+                <option value="Cannot Reproduce">Cannot Reproduce</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="approveLinkedIssues" class="form-label">Linked Issues</label>
+            <input type="text" id="approveLinkedIssues" class="form-control" placeholder="Nhập ID của các issue liên quan (phân cách bằng dấu phẩy)">
+        </div>
+
+        <div class="mb-3">
+            <label for="approveIssue" class="form-label">Issue</label>
+            <select id="approveIssue" class="form-select">
+                <option value="">Chọn issue...</option>
+                <option value="Bug">Bug</option>
+                <option value="Task">Task</option>
+                <option value="Story">Story</option>
+                <option value="Epic">Epic</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="approveComment" class="form-label">Comment</label>
+            <textarea id="approveComment" class="form-control" rows="3" placeholder="Nhập nhận xét cho việc phê duyệt..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="approveCustomerResponse" class="form-label">Respond to Customer</label>
+            <textarea id="approveCustomerResponse" class="form-control" rows="3" placeholder="Nhập nội dung phản hồi cho khách hàng..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-secondary" onclick="closeApproveModal()">Thoát</button>
+            <button type="button" class="btn btn-success" id="confirmApproveBtn">Xác nhận phê duyệt</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Reject Popup -->
+<div id="rejectModal" class="modal-overlay" style="display:none;">
+    <div class="modal-backdrop" onclick="closeRejectModal()"></div>
+    <div class="modal-card" style="max-width:600px;">
+        <button type="button" class="close-modal-btn" onclick="closeRejectModal()">&times;</button>
+        <h4 class="mb-3" id="rejectTitle">Từ chối yêu cầu</h4>
+        <div class="mb-2 text-muted" id="rejectStatus"></div>
+        <div class="mb-2" id="rejectDescription"></div>
+        
+        <div class="mb-3">
+            <label class="form-label">Hành động</label>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="rejectAction" id="rejectActionComplete" value="complete" checked>
+                <label class="form-check-label" for="rejectActionComplete">
+                    Từ chối và đóng yêu cầu
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="rejectAction" id="rejectActionRequestInfo" value="requestInfo">
+                <label class="form-check-label" for="rejectActionRequestInfo">
+                    Yêu cầu bổ sung thông tin
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="rejectReason" class="form-label">Lý do</label>
+            <select id="rejectReason" class="form-select">
+                <option value="">Chọn lý do...</option>
+                <option value="Invalid Request">Yêu cầu không hợp lệ</option>
+                <option value="Insufficient Information">Thiếu thông tin</option>
+                <option value="Out of Scope">Ngoài phạm vi</option>
+                <option value="Duplicate">Trùng lặp</option>
+                <option value="Other">Khác</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="additionalInfoSection" style="display: none;">
+            <label for="additionalInfoRequest" class="form-label">Thông tin cần bổ sung</label>
+            <textarea id="additionalInfoRequest" class="form-control" rows="3" placeholder="Nhập chi tiết thông tin cần người dùng bổ sung..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="rejectComment" class="form-label">Nhận xét nội bộ</label>
+            <textarea id="rejectComment" class="form-control" rows="3" placeholder="Nhập nhận xét cho việc từ chối..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="rejectCustomerResponse" class="form-label">Phản hồi cho khách hàng</label>
+            <textarea id="rejectCustomerResponse" class="form-control" rows="3" placeholder="Nhập nội dung phản hồi cho khách hàng..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Thoát</button>
+            <button type="button" class="btn btn-danger" id="confirmRejectBtn">Xác nhận từ chối</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toastNotification" class="toast-notification" style="display: none;">
+    <div class="toast-content">
+        <i class="fas fa-check-circle"></i>
+        <div class="toast-message">Phê duyệt thành công!</div>
+    </div>
+    <div class="toast-progress"></div>
+</div>
+
+<!-- Modal Additional Info Popup -->
+<div id="additionalInfoModal" class="modal-overlay" style="display:none;">
+    <div class="modal-backdrop" onclick="closeAdditionalInfoModal()"></div>
+    <div class="modal-card" style="max-width:600px;">
+        <button type="button" class="close-modal-btn" onclick="closeAdditionalInfoModal()">&times;</button>
+        <h4 class="mb-3" id="additionalInfoTitle">Bổ sung thông tin</h4>
+        <div class="mb-2 text-muted" id="additionalInfoStatus"></div>
+        <div class="mb-2" id="additionalInfoDescription"></div>
+        
+        <div class="mb-3">
+            <label for="additionalInfoContent" class="form-label">Thông tin bổ sung</label>
+            <textarea id="additionalInfoContent" class="form-control" rows="5" placeholder="Nhập thông tin bổ sung theo yêu cầu..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="additionalInfoComment" class="form-label">Ghi chú thêm (nếu cần)</label>
+            <textarea id="additionalInfoComment" class="form-control" rows="3" placeholder="Nhập ghi chú thêm nếu cần..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-secondary" onclick="closeAdditionalInfoModal()">Đóng</button>
+            <button type="button" class="btn btn-primary" id="confirmAdditionalInfoBtn">Gửi thông tin bổ sung</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRequestId = null;
+
+function showCommentForm() {
+    document.querySelector('.comment-form').style.display = 'block';
+    document.querySelector('.comment-form textarea').focus();
+}
+
+function cancelComment() {
+    document.querySelector('.comment-form').style.display = 'none';
+    document.querySelector('.comment-form textarea').value = '';
+}
+
+function submitComment() {
+    const commentText = document.querySelector('.comment-form textarea').value.trim();
+    if (!commentText) {
+        alert('Please enter a comment');
+        return;
+    }
+
+    const submitBtn = document.querySelector('.comment-form .btn-primary');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+
+    fetch('/request/add-comment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+        },
+        body: JSON.stringify({
+            requestId: currentRequestId,
+            comment: commentText
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Add new comment to container
+        const commentHtml = `
+            <div class="comment-item mb-3">
+                <div class="d-flex align-items-center mb-1">
+                    <div class="me-2">
+                        <i class="fa-regular fa-user-circle fa-lg"></i>
+                    </div>
+                    <div>
+                        <b>${data.userName}</b>
+                        <span class="text-muted ms-2" style="font-size:12px;">${data.createdAt}</span>
+                    </div>
+                </div>
+                <div class="comment-text ms-4">${data.comment}</div>
+            </div>
+        `;
+        
+        const commentsContainer = document.getElementById('modalComments');
+        if (commentsContainer.querySelector('.text-muted')) {
+            commentsContainer.innerHTML = '';
+        }
+        commentsContainer.insertAdjacentHTML('afterbegin', commentHtml);
+        
+        // Clear and hide form
+        document.querySelector('.comment-form textarea').value = '';
+        document.querySelector('.comment-form').style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to add comment');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+function openRequestModal(data) {
+    currentRequestId = data.requestId; // Store the current request ID
+    document.getElementById('modalTitle').innerText = data.title || '--';
+    document.getElementById('modalReporter').innerText = data.reporter || '--';
+    document.getElementById('modalReporter2').innerText = data.reporter || '--';
+    document.getElementById('modalReporterEmail').innerText = data.reporterEmail || '--';
+    document.getElementById('modalDescription').innerText = data.description || 'No description';
+    document.getElementById('modalAssignee').innerText = data.assignee || '--';
+    document.getElementById('modalPriority').innerText = data.priority || '--';
+    document.getElementById('modalStatus').innerText = data.status || '--';
+    document.getElementById('modalCreated').innerText = data.created || '--';
+    
+    // Update SLAs section
+    const slaContainer = document.querySelector('.jira-modal-side .card:first-child');
+    if (slaContainer) {
+        const slaItems = slaContainer.querySelectorAll('.d-flex.align-items-center');
+        if (slaItems.length >= 2) {
+            const responseTime = data.responseTime || '--';
+            const resolutionTime = data.resolutionTime || '--';
+            
+            // Update response time
+            slaItems[0].querySelector('span:first-child').innerText = responseTime;
+            slaItems[0].querySelector('span:last-child').innerText = `Time to first response within ${responseTime}h`;
+            
+            // Update resolution time
+            slaItems[1].querySelector('span:first-child').innerText = resolutionTime;
+            slaItems[1].querySelector('span:last-child').innerText = `Time to resolution within ${resolutionTime}h`;
+
+            // Update status badges
+            const responseBadge = slaItems[0].querySelector('.badge');
+            const resolutionBadge = slaItems[1].querySelector('.badge');
+            
+            if (responseBadge && resolutionBadge) {
+                // Set badge colors based on status
+                responseBadge.className = 'badge ' + (data.responseTime ? 'bg-success' : 'bg-danger');
+                resolutionBadge.className = 'badge ' + (data.resolutionTime ? 'bg-success' : 'bg-danger');
+                
+                // Update icons
+                responseBadge.innerHTML = data.responseTime ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-pause"></i>';
+                resolutionBadge.innerHTML = data.resolutionTime ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-pause"></i>';
+            }
+        }
+    }
+
+    // Update comments section
+    const commentsContainer = document.getElementById('modalComments');
+    if (data.comments && data.comments.length > 0) {
+        let commentsHtml = '';
+        data.comments.forEach(comment => {
+            commentsHtml += `
+                <div class="comment-item mb-3">
+                    <div class="d-flex align-items-center mb-1">
+                        <div class="me-2">
+                            <i class="fa-regular fa-user-circle fa-lg"></i>
+                        </div>
+                        <div>
+                            <b>${comment.userName}</b>
+                            <span class="text-muted ms-2" style="font-size:12px;">${comment.createdAt}</span>
+                        </div>
+                    </div>
+                    <div class="comment-text ms-4">${comment.content}</div>
+                </div>
+            `;
+        });
+        commentsContainer.innerHTML = commentsHtml;
+    } else {
+        commentsContainer.innerHTML = '<div class="text-muted" style="font-size:13px;">No comments yet</div>';
+    }
+    
+    const modal = document.getElementById('requestDetailModal');
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    
+    // Trigger animation
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
+function closeRequestModal() {
+    const modal = document.getElementById('requestDetailModal');
+    modal.classList.remove('show');
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }, 300);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var card = btn.closest('.kanban-card');
+            var title = card.querySelector('.fw-bold')?.innerText || '';
+            var status = card.querySelectorAll('.badge')[1]?.innerText || '';
+            var description = card.dataset.description || 'No description';
+            var assignee = card.dataset.assignee || '--';
+            var requestId = card.querySelector('.small.text-muted')?.innerText.replace('ID: ', '');
+            var responseTime = card.dataset.responseTime || '--';
+            var resolutionTime = card.dataset.resolutionTime || '--';
+            var priority = card.querySelectorAll('.badge')[0]?.innerText || '--';
+            var createdAt = card.querySelector('.small:nth-of-type(3)')?.innerText || '--';
+            
+            // Fetch comments from API
+            fetch(`/request/get-comments/${requestId}`)
+                .then(res => res.json())
+                .then(comments => {
+                    openRequestModal({
+                        requestId,
+                        title,
+                        reporter: card.dataset.reporter || '--',
+                        reporterEmail: card.dataset.reporterEmail || '--',
+                        description,
+                        status,
+                        responseTime,
+                        resolutionTime,
+                        priority,
+                        assignee,
+                        created: createdAt,
+                        comments
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching comments:', error);
+                    // Still open modal even if comments fetch fails
+                    openRequestModal({
+                        requestId,
+                        title,
+                        reporter: card.dataset.reporter || '--',
+                        reporterEmail: card.dataset.reporterEmail || '--',
+                        description,
+                        status,
+                        responseTime,
+                        resolutionTime,
+                        priority,
+                        assignee,
+                        created: createdAt,
+                        comments: []
+                    });
+                });
+        });
+    });
+});
+
+function openApproveModal(requestId, title, status, description) {
+    document.getElementById('approveTitle').textContent = title;
+    document.getElementById('approveStatus').textContent = 'Trạng thái: ' + status;
+    document.getElementById('approveDescription').textContent = description;
+    document.getElementById('approveComment').value = '';
+    document.getElementById('approveCustomerResponse').value = '';
+    document.getElementById('approveResolution').value = '';
+    document.getElementById('approveLinkedIssues').value = '';
+    document.getElementById('approveIssue').value = '';
+    
+    // Lưu requestId vào data attribute của modal
+    document.getElementById('approveModal').dataset.requestId = requestId;
+    
+    const modal = document.getElementById('approveModal');
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    
+    // Trigger animation
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
+function closeApproveModal() {
+    const modal = document.getElementById('approveModal');
+    modal.classList.remove('show');
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        // Reset các trường input
+        document.getElementById('approveComment').value = '';
+        document.getElementById('approveCustomerResponse').value = '';
+        document.getElementById('approveResolution').value = '';
+        document.getElementById('approveLinkedIssues').value = '';
+        document.getElementById('approveIssue').value = '';
+    }, 300);
+}
+
+// Hiển thị modal khi nhấn nút phê duyệt
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.approve-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('requestDetailModal').style.display = 'none';
+            var card = this.closest('.kanban-card');
+            var title = card.querySelector('.fw-bold').textContent;
+            var status = card.querySelectorAll('.badge')[1].textContent;
+            var description = card.querySelector('.small:nth-of-type(2)').textContent;
+            var requestId = this.dataset.requestId;
+            
+            openApproveModal(requestId, title, status, description);
+        });
+    });
+});
+
+// Function to show toast notification
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toastNotification');
+    const toastMessage = toast.querySelector('.toast-message');
+    const progressBar = toast.querySelector('.toast-progress');
+    const toastIcon = toast.querySelector('.toast-content i');
+    
+    // Set message
+    toastMessage.textContent = message;
+    
+    // Set icon and color based on type
+    if (type === 'success') {
+        toastIcon.className = 'fas fa-check-circle';
+        toastIcon.style.color = '#4CAF50';
+        progressBar.style.background = '#4CAF50';
+    } else if (type === 'error') {
+        toastIcon.className = 'fas fa-times-circle';
+        toastIcon.style.color = '#f44336';
+        progressBar.style.background = '#f44336';
+    } else if (type === 'warning') {
+        toastIcon.className = 'fas fa-exclamation-circle';
+        toastIcon.style.color = '#ff9800';
+        progressBar.style.background = '#ff9800';
+    } else if (type === 'info') {
+        toastIcon.className = 'fas fa-info-circle';
+        toastIcon.style.color = '#2196F3';
+        progressBar.style.background = '#2196F3';
+    }
+    
+    // Show toast
+    toast.style.display = 'flex';
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    // Reset progress bar
+    progressBar.style.animation = 'none';
+    progressBar.offsetHeight; // Trigger reflow
+    progressBar.style.animation = 'progress 3s linear forwards';
+    
+    // Hide toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 300);
+    }, 3000);
+}
+
+// Update the success handler in the approve button click event
+document.getElementById('confirmApproveBtn').addEventListener('click', function() {
+    var comment = document.getElementById('approveComment').value;
+    var customerResponse = document.getElementById('approveCustomerResponse').value;
+    var resolution = document.getElementById('approveResolution').value;
+    var linkedIssues = document.getElementById('approveLinkedIssues').value;
+    var issue = document.getElementById('approveIssue').value;
+    var requestId = document.getElementById('approveModal').dataset.requestId;
+    
+    if (!requestId) {
+        showToast('Không tìm thấy ID của yêu cầu!', 'error');
+        return;
+    }
+
+    // Hiển thị loading state
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+
+    // Gọi API để cập nhật trạng thái
+    fetch('/request/approve', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+        },
+        body: JSON.stringify({
+            requestId: parseInt(requestId),
+            comment: comment,
+            customerResponse: customerResponse,
+            resolution: resolution,
+            linkedIssues: linkedIssues,
+            issue: issue
+        })
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} ${response.statusText}\n${errorText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Đóng modal
+            closeApproveModal();
+            // Show toast notification
+            showToast('Phê duyệt thành công!', 'success');
+            // Reload trang sau khi toast biến mất
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            throw new Error(data.message || 'Có lỗi xảy ra khi phê duyệt');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra: ' + error.message, 'error');
+        // Reset button state
+        this.disabled = false;
+        this.innerHTML = 'Xác nhận phê duyệt';
+    });
+});
+
+function openRejectModal(requestId, title, status, description) {
+    document.getElementById('rejectTitle').textContent = title;
+    document.getElementById('rejectStatus').textContent = 'Trạng thái: ' + status;
+    document.getElementById('rejectDescription').textContent = description;
+    document.getElementById('rejectComment').value = '';
+    document.getElementById('rejectCustomerResponse').value = '';
+    document.getElementById('rejectReason').value = '';
+    
+    // Lưu requestId vào data attribute của modal
+    document.getElementById('rejectModal').dataset.requestId = requestId;
+    
+    const modal = document.getElementById('rejectModal');
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    
+    // Trigger animation
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
+function closeRejectModal() {
+    const modal = document.getElementById('rejectModal');
+    modal.classList.remove('show');
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        // Reset các trường input
+        document.getElementById('rejectComment').value = '';
+        document.getElementById('rejectCustomerResponse').value = '';
+        document.getElementById('rejectReason').value = '';
+        document.getElementById('additionalInfoRequest').value = '';
+        document.getElementById('rejectActionComplete').checked = true;
+        document.getElementById('additionalInfoSection').style.display = 'none';
+    }, 300);
+}
+
+// Hiển thị modal khi nhấn nút từ chối
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.reject-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('requestDetailModal').style.display = 'none';
+            var card = this.closest('.kanban-card');
+            var title = card.querySelector('.fw-bold').textContent;
+            var status = card.querySelectorAll('.badge')[1].textContent;
+            var description = card.querySelector('.small:nth-of-type(2)').textContent;
+            var requestId = this.dataset.requestId;
+            
+            openRejectModal(requestId, title, status, description);
+        });
+    });
+});
+
+// Xử lý sự kiện khi nhấn nút xác nhận từ chối
+document.getElementById('confirmRejectBtn').addEventListener('click', function() {
+    var comment = document.getElementById('rejectComment').value;
+    var customerResponse = document.getElementById('rejectCustomerResponse').value;
+    var reason = document.getElementById('rejectReason').value;
+    var requestId = document.getElementById('rejectModal').dataset.requestId;
+    var action = document.querySelector('input[name="rejectAction"]:checked').value;
+    var additionalInfo = document.getElementById('additionalInfoRequest').value;
+    
+    if (!requestId) {
+        showToast('Không tìm thấy ID của yêu cầu!', 'error');
+        return;
+    }
+
+    if (!reason) {
+        showToast('Vui lòng chọn lý do!', 'warning');
+        return;
+    }
+
+    if (action === 'requestInfo' && !additionalInfo) {
+        showToast('Vui lòng nhập thông tin cần bổ sung!', 'warning');
+        return;
+    }
+
+    // Hiển thị loading state
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+
+    // Chuẩn bị dữ liệu gửi đi theo đúng model RejectRequestModel
+    const requestData = {
+        requestId: parseInt(requestId),
+        action: action,
+        reason: reason,
+        comment: comment || '',
+        customerResponse: customerResponse || '',
+        additionalInfo: action === 'requestInfo' ? additionalInfo : '',
+        completeAction: action === 'complete' ? 'reject' : ''
+    };
+
+    // Log dữ liệu gửi đi để debug
+    console.log('Sending request data:', requestData);
+
+    // Gọi API để cập nhật trạng thái
+    fetch('/request/reject', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorText: errorText
+            });
+            throw new Error(`Server error: ${response.status} ${response.statusText}\n${errorText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Đóng modal
+            closeRejectModal();
+            
+            // Show toast notification với thông báo phù hợp
+            if (action === 'requestInfo') {
+                showToast('Yêu cầu bổ sung thông tin đã được gửi! Yêu cầu sẽ được chuyển về cho người gửi.', 'info');
+            } else {
+                showToast('Từ chối yêu cầu thành công!', 'success');
+            }
+            
+            // Reload trang sau khi toast biến mất
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            throw new Error(data.message || 'Có lỗi xảy ra khi xử lý yêu cầu');
+        }
+    })
+    .catch(error => {
+        console.error('Error details:', error);
+        showToast('Có lỗi xảy ra: ' + error.message, 'error');
+        // Reset button state
+        this.disabled = false;
+        this.innerHTML = 'Xác nhận từ chối';
+    });
+});
+
+// Thêm JavaScript để xử lý hiển thị/ẩn phần yêu cầu thông tin bổ sung
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý radio button action
+    document.querySelectorAll('input[name="rejectAction"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const additionalInfoSection = document.getElementById('additionalInfoSection');
+            const additionalInfoRequest = document.getElementById('additionalInfoRequest');
+            
+            if (this.value === 'requestInfo') {
+                additionalInfoSection.style.display = 'block';
+                additionalInfoRequest.setAttribute('required', 'required');
+            } else {
+                additionalInfoSection.style.display = 'none';
+                additionalInfoRequest.removeAttribute('required');
+            }
+        });
+    });
+});
+
+function openAdditionalInfoModal(status, description) {
+    document.getElementById('additionalInfoTitle').textContent = 'Bổ sung thông tin';
+    document.getElementById('additionalInfoStatus').textContent = 'Trạng thái: ' + status;
+    document.getElementById('additionalInfoDescription').textContent = description;
+    document.getElementById('additionalInfoContent').value = '';
+    document.getElementById('additionalInfoComment').value = '';
+    
+    // Lưu requestId vào data attribute của modal
+    const requestId = event.currentTarget.dataset.requestId;
+    document.getElementById('additionalInfoModal').dataset.requestId = requestId;
+    
+    const modal = document.getElementById('additionalInfoModal');
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    
+    // Trigger animation
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
+function closeAdditionalInfoModal() {
+    const modal = document.getElementById('additionalInfoModal');
+    modal.classList.remove('show');
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        // Reset các trường input
+        document.getElementById('additionalInfoContent').value = '';
+        document.getElementById('additionalInfoComment').value = '';
+    }, 300);
+}
+
+// Update the success handler in the additional info button click event
+document.getElementById('confirmAdditionalInfoBtn').addEventListener('click', function() {
+    var content = document.getElementById('additionalInfoContent').value;
+    var comment = document.getElementById('additionalInfoComment').value;
+    var requestId = document.getElementById('additionalInfoModal').dataset.requestId;
+    
+    if (!requestId) {
+        showToast('Không tìm thấy ID của yêu cầu!', 'error');
+        return;
+    }
+
+    if (!content) {
+        showToast('Vui lòng nhập thông tin bổ sung!', 'warning');
+        return;
+    }
+
+    // Hiển thị loading state
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+
+    // Gọi API để cập nhật thông tin bổ sung
+    fetch('/request/add-additional-info', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+        },
+        body: JSON.stringify({
+            requestId: parseInt(requestId),
+            content: content,
+            comment: comment
+        })
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} ${response.statusText}\n${errorText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Đóng modal
+            closeAdditionalInfoModal();
+            // Show toast notification
+            showToast('Thông tin bổ sung đã được gửi!', 'success');
+            // Reload trang sau khi toast biến mất
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            throw new Error(data.message || 'Có lỗi xảy ra khi xử lý thông tin bổ sung');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Có lỗi xảy ra: ' + error.message, 'error');
+        // Reset button state
+        this.disabled = false;
+        this.innerHTML = 'Gửi thông tin bổ sung';
+    });
+});
+</script>

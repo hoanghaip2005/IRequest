@@ -4,13 +4,20 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
 @inject IAuthorizationService authorizationService
+@inject UserManager<AppUser> UserManager
+@inject AppDbContext DbContext
 
 @{
     var isAuthenticated = User.Identity.IsAuthenticated;
-    var isAdmin = User.IsInRole("Admin");
+    var isAdmin = User.IsInRole("Administrator");
     var isMember = User.IsInRole("Member");
     var canViewManageMenu = await authorizationService.AuthorizeAsync(User, "ViewManageMenu");
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var currentUser = await UserManager.FindByIdAsync(currentUserId);
+    var userRoles = await UserManager.GetRolesAsync(currentUser);
+    var vnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 }
 @{
     ViewData["Title"] = "Request List";
@@ -69,7 +76,7 @@
                 </div>
             </div>
             <div class="row col-12">
-                    <table class="table" style="border-right: 0.5px solid #ccc; ">
+                    <table class="table" style="border-right: 0px solid #ccc; ">
                         <thead>
                             <tr>
                                 <th>
@@ -81,7 +88,7 @@
                                 <th>Assign</th>
                                 <th>Status</th>
                                 <th>Created At</th>
-                                <th>Resolution Time</th>
+                                <th style="width: 160px;">Resolution Time</th>
                             </tr>
                             <tr id="actionHeaderRow" style="display:none;">
                                 <th colspan="8">
@@ -177,74 +184,97 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                var isApproved = item.Status?.StatusName == "Approved";
-                                var approvedAt = item.UpdatedAt;
-                                var resolutionTime = item.Priority?.ResolutionTime;
-                                DateTime? resolutionDeadline = null;
-                                if (isApproved && approvedAt != null && resolutionTime != null)
+                                var currentStep = item.Workflow?.Steps?.FirstOrDefault(s => s.StepOrder == item.CurrentStepOrder);
+                                var isRequester = item.UsersId == currentUserId;
+                                var hasRoleInStep = currentStep != null && 
+                                    (!string.IsNullOrEmpty(currentStep.RequiredRoleId) && userRoles.Contains(currentStep.RequiredRoleId));
+                                var isAssignedInStep = currentStep != null && 
+                                    (currentStep.AssignedUserId == currentUserId || item.AssignedUserId == currentUserId);
+
+                                // Check if user has approved this request in any previous step
+                                var hasApprovedInPreviousStep = await DbContext.RequestApprovals
+                                    .AnyAsync(ra => ra.RequestId == item.RequestID && ra.ApprovedByUserId == currentUserId);
+
+                                // Show request if:
+                                // 1. User is admin (can see all requests)
+                                // 2. User is the requester (can see their own requests)
+                                // 3. User has role in current step
+                                // 4. User is assigned in current step
+                                // 5. User has approved this request in a previous step
+                                var shouldShow = isAdmin || isRequester || hasRoleInStep || isAssignedInStep || hasApprovedInPreviousStep;
+
+                                if (shouldShow)
                                 {
-                                    resolutionDeadline = approvedAt.AddHours((double)resolutionTime);
-                                }
-                                <tr class="request-row">
-                                    <td>
-                                        <input type="checkbox" class="form-check-input select-item" data-id="@item.RequestID" />
-                                    </td>
-                                    <td class="title-cell d-flex justify-content-between align-items-center">
-                                        <span class="title-value">@Html.DisplayFor(modelItem => item.Title)</span> 
-                                        <span class="info-icon " data-id="@item.RequestID" style="cursor:pointer; margin-left:6px;">
-                                            <i class="fa-solid fa-circle-info"></i>
-                                        </span>
-                                    </td>
-                                <td class="desc-value">@Html.DisplayFor(modelItem => item.Description)</td>
-                                <td class="assignee-value">
-                                    @item.User?.UserName
-                                    @if (item.User?.Department != null)
+                                    var approvedAt = item.ApprovedAt;
+                                    var resolutionTime = item.Priority?.ResolutionTime;
+                                    DateTime? resolutionDeadline = null;
+                                    if (approvedAt.HasValue && resolutionTime.HasValue)
                                     {
-                                        <span class="ms-2 badge bg-info" title="@item.User.Department.Name">
-                                            @item.User.Department.Name
-                                        </span>
+                                        resolutionDeadline = approvedAt.Value.AddHours((double)resolutionTime.Value);
                                     }
-                                </td>
-                                <td>
-                                    @if (item.AssignedUser != null)
-                                        {
-                                            @item.AssignedUser.UserName
-                                            @if (item.AssignedUser?.Department != null)
+                                    <tr class="request-row">
+                                        <td class="text-center align-middle">
+                                            <input type="checkbox" class="form-check-input select-item" data-id="@item.RequestID" />
+                                        </td>
+                                        <td class="title-cell">
+                                            <div class="d-flex align-items-center">
+                                                <span class="title-value flex-grow-1">@Html.DisplayFor(modelItem => item.Title)</span>
+                                                <span class="info-icon" data-id="@item.RequestID">
+                                                    <i class="fa-solid fa-circle-info"></i>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="desc-value">@Html.DisplayFor(modelItem => item.Description)</td>
+                                        <td class="assignee-value">
+                                            @item.User?.UserName
+                                            @if (item.User?.Department != null)
                                             {
-                                                <span class="ms-2 badge bg-secondary">
-                                                    @item.AssignedUser.Department.Name
+                                                <span class="ms-2 badge bg-info" title="@item.User.Department.Name">
+                                                    @item.User.Department.Name
                                                 </span>
                                             }
-                                        }
-                                        else
-                                        {
-                                            <span>No User Assigned</span>
-                                        }
-                                    </td>
-                                    <td class="status-value">
-                                        @if (item.Status != null)
-                                        {
-                                            <span class="badge @(item.Status.StatusName == "In Progress" ? "bg-warning text-dark" : item.Status.StatusName == "Approved" ? "bg-success" : "bg-secondary")">
-                                                @item.Status.StatusName
-                                            </span>
-                                        }
-                                    </td>
-                                    <td class="priority-value">@Html.DisplayFor(modelItem => item.CreatedAt)</td>
-                                    <td>
-                                        @if (isApproved && resolutionDeadline != null)
-                                        {
-                                            <span class="badge bg-danger ms-2" style="font-size:13px;">
-                                                Resolution Time: @resolutionDeadline.Value.ToString("dd/MM/yyyy HH:mm:ss")
-                                            </span>
-                                        }
-                                    </td>
-                                    @* <td>
-                                        <a asp-action="Edit" asp-route-id="@item.RequestID"
-                                            class="btn btn-primary btn-sm">Edit</a>
-                                        <a asp-action="Details" asp-route-id="@item.RequestID"
-                                            class="btn btn-info btn-sm">Details</a>
-                                    </td> *@
-                                </tr>
+                                        </td>
+                                        <td>
+                                            @if (item.AssignedUser != null)
+                                            {
+                                                @item.AssignedUser.UserName
+                                                @if (item.AssignedUser?.Department != null)
+                                                {
+                                                    <span class="ms-2 badge bg-secondary">
+                                                        @item.AssignedUser.Department.Name
+                                                    </span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span>No User Assigned</span>
+                                            }
+                                        </td>
+                                        <td class="status-value">
+                                            @if (item.Status != null)
+                                            {
+                                                <span class="badge @(item.Status.StatusName == "Closed" ? "bg-danger" : item.Status.StatusName == "In Progress" ? "bg-warning text-dark" : item.Status.StatusName == "Approved" ? "bg-success" : "bg-secondary")">
+                                                    @item.Status.StatusName
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="priority-value">
+                                            @{
+                                                var createdDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(item.CreatedAt, DateTimeKind.Utc), vnTimeZone);
+                                                @createdDate.ToString("dd/MM/yyyy HH:mm:ss")
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (resolutionDeadline != null)
+                                            {
+                                                var vnDeadline = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(resolutionDeadline.Value, DateTimeKind.Utc), vnTimeZone);
+                                                <span class="badge bg-danger ms-2" style="font-size:13px;">
+                                                        @vnDeadline.ToString("dd/MM/yyyy HH:mm:ss")
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
@@ -262,7 +292,7 @@
                                 </div>
                                 <div>
                                     <b>@item.User.UserName</b>
-                                    <span class="text-muted">via Email</span>
+                                    <span class="text-muted">@item.User.Email</span>
                                     <a href="#" class="ms-2" style="font-size:13px;">Hide details</a>
                                 </div>
                             </div>
@@ -303,7 +333,18 @@
                                                 </div>
                                                 <div>
                                                     <b>@comment.User.UserName</b>
-                                                    <span class="text-muted ms-2" style="font-size:12px;">@comment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                                    @if (comment.User?.Department != null)
+                                                    {
+                                                        <span class="badge bg-info text-dark ms-2" style="font-size:11px;">
+                                                            @comment.User.Department.Name
+                                                        </span>
+                                                    }
+                                                    <span class="text-muted ms-2" style="font-size:12px;">
+                                                        @{
+                                                            var commentDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(comment.CreatedAt, DateTimeKind.Utc), vnTimeZone);
+                                                            @commentDate.ToString("dd/MM/yyyy HH:mm:ss")
+                                                        }
+                                                    </span>
                                                 </div>
                                             </div>
                                             <div class="comment-text ms-4">@comment.Content</div>
@@ -312,7 +353,9 @@
                                 }
                                 else
                                 {
-                                    <div class="text-muted" style="font-size:13px;">No comments yet</div>
+                                    <div class="text-muted text-center py-3">
+                                        <i class="fas fa-comments"></i> No comments yet
+                                    </div>
                                 }
                             </div>
                             <div class="comment-form mt-3" id="commentForm-@item.RequestID" style="display:none;">
@@ -693,18 +736,20 @@
             $(document).on('click', '[id^=addCommentBtn-]', function() {
                 const requestId = $(this).attr('id').split('-')[1];
                 $(`#commentForm-${requestId}`).show();
+                $(`#commentForm-${requestId} textarea`).focus();
             });
 
             $(document).on('click', '[id^=cancelCommentBtn-]', function() {
                 const requestId = $(this).attr('id').split('-')[1];
                 $(`#commentForm-${requestId}`).hide();
+                $(`#commentForm-${requestId} textarea`).val('');
             });
 
             $(document).on('click', '[id^=submitCommentBtn-]', function() {
                 const requestId = $(this).attr('id').split('-')[1];
-                const commentText = $(`#commentForm-${requestId} textarea`).val();
+                const commentText = $(`#commentForm-${requestId} textarea`).val().trim();
                 
-                if (!commentText.trim()) {
+                if (!commentText) {
                     alert('Please enter a comment');
                     return;
                 }
@@ -712,7 +757,7 @@
                 // Disable submit button and show loading state
                 const $submitBtn = $(this);
                 const originalText = $submitBtn.text();
-                $submitBtn.prop('disabled', true).text('Adding...');
+                $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...');
 
                 // Send comment to server
                 $.ajax({
@@ -733,7 +778,8 @@
                                     </div>
                                     <div>
                                         <b>${response.userName}</b>
-                                        <span class="text-muted ms-2" style="font-size:12px;">${response.createdAt}</span>
+                                        ${response.department ? `<span class="badge bg-info text-dark ms-2" style="font-size:11px;">${response.department}</span>` : ''}
+                                        <span class="text-muted ms-2" style="font-size:12px;">${new Date(response.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</span>
                                     </div>
                                 </div>
                                 <div class="comment-text ms-4">${response.comment}</div>
@@ -741,7 +787,8 @@
                         `;
                         
                         const $container = $(`#commentsContainer-${requestId}`);
-                        if ($container.find('.text-muted').length) {
+                        const $noComments = $container.find('.text-muted.text-center');
+                        if ($noComments.length) {
                             $container.empty();
                         }
                         $container.prepend(commentHtml);
@@ -749,6 +796,9 @@
                         // Clear and hide form
                         $(`#commentForm-${requestId} textarea`).val('');
                         $(`#commentForm-${requestId}`).hide();
+
+                        // Show success toast
+                        showToast('Comment added successfully');
                     },
                     error: function(xhr) {
                         let errorMessage = 'Failed to add comment';
@@ -768,6 +818,41 @@
                     }
                 });
             });
+
+            // Function to update countdown timers
+            function updateCountdowns() {
+                $('.countdown-timer').each(function() {
+                    const $timer = $(this);
+                    const deadlineTicks = parseInt($timer.data('deadline'));
+                    const deadline = new Date(deadlineTicks / 10000); // Convert .NET ticks to JavaScript milliseconds
+                    const now = new Date();
+                    const diff = deadline - now;
+
+                    if (diff <= 0) {
+                        $timer.find('.countdown-value').text('Time expired');
+                        $timer.addClass('bg-danger');
+                        return;
+                    }
+
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    const timeString = `${hours}h ${minutes}m ${seconds}s`;
+                    $timer.find('.countdown-value').text(timeString);
+
+                    // Change color based on remaining time
+                    if (hours < 1) {
+                        $timer.removeClass('bg-warning').addClass('bg-danger');
+                    } else if (hours < 4) {
+                        $timer.removeClass('bg-danger').addClass('bg-warning');
+                    }
+                });
+            }
+
+            // Update countdowns every second
+            setInterval(updateCountdowns, 1000);
+            updateCountdowns(); // Initial update
         });
     </script>
 }
@@ -883,12 +968,27 @@
         padding: 4px 10px;
     }
 
-    .title-cell .info-icon {
-        display: none !important;
+    .title-cell {
+        min-width: 180px;
+        padding-right: 0 !important;
     }
-
+    .title-cell .title-value {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    .title-cell .info-icon {
+        width: 24px;
+        min-width: 24px;
+        max-width: 24px;
+        height: 20px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        visibility: hidden;
+        transition: visibility 0.2s;
+    }
     .title-cell:hover .info-icon {
-        display: inline-block !important;
+        visibility: visible;
     }
 
     .detail-card {
@@ -987,13 +1087,40 @@
     }
 
     /* Comment styles */
+    .comments-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+
+    .comments-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .comments-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .comments-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .comments-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
     .comment-item {
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        margin-bottom: 12px;
+        border: 1px solid #e9ecef;
     }
 
     .comment-item:last-child {
-        border-bottom: none;
+        margin-bottom: 0;
     }
 
     .comment-text {
@@ -1001,6 +1128,7 @@
         font-size: 14px;
         line-height: 1.5;
         word-break: break-word;
+        white-space: pre-wrap;
     }
 
     .btn-outline-primary {
@@ -1020,12 +1148,38 @@
         border-radius: 6px;
         resize: vertical;
         font-size: 14px;
+        padding: 8px 12px;
     }
 
     .comment-form textarea:focus {
         border-color: #1976d2;
         box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
     }
+
+    .countdown-timer {
+        transition: background-color 0.3s ease;
+    }
+
+    .countdown-timer.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .countdown-timer.bg-danger {
+        background-color: #dc3545 !important;
+        color: #fff !important;
+    }
+
+    .table>:not(:first-child) {
+        border-top: 1px solid #ccc;
+    }
+
+    tr.request-row, tr.request-row > td {
+        border-top: none !important;
+        border-bottom: none !important;
+    }
+
+    .main-content { padding-top: 0 !important; }
 </style>
 
   

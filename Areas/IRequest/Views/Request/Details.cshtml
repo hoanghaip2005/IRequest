@@ -1,7 +1,9 @@
+@using System.Security.Claims
 @model App.Models.IRequest.Request
 
 @{
     ViewData["Title"] = "Thông Tin Chi Tiết Yêu Cầu";
+    var stepHistories = ViewBag.StepHistories as List<App.Models.IRequest.RequestStepHistory>;
 }
 
 <div class="container-fluid">
@@ -84,7 +86,47 @@
         </dl>
     </div>
     <div class="md-4 mx-4">
+        @if (Model.AssignedUserId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+        {
+            <form asp-action="MoveToNextStep" method="post" class="d-inline">
+                <input type="hidden" name="requestId" value="@Model.RequestID" />
+                <textarea name="note" placeholder="Nhận xét..." class="form-control mb-2"></textarea>
+                <button type="submit" class="btn btn-primary">Chuyển bước</button>
+            </form>
+            <form asp-action="ApproveRequest" method="post" class="d-inline">
+                <input type="hidden" name="requestId" value="@Model.RequestID" />
+                <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+        }
         <a asp-action="Edit" asp-route-id="@Model?.RequestID" class="btn btn-primary">Edit</a> |
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+    <div class="row mt-4">
+        <h2>Lịch sử bước</h2>
+    </div>
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Bước</th>
+                    <th>Người thực hiện</th>
+                    <th>Thời gian</th>
+                    <th>Nhận xét</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var h in stepHistories)
+            {
+                <tr>
+                    <td>@h.StepOrder</td>
+                    <td>@h.ActionByUserId</td>
+                    <td>@h.ActionTime</td>
+                    <td>@h.Note</td>
+                    <td>@h.StatusID</td>
+                </tr>
+            }
+            </tbody>
+        </table>
     </div>
 </div>

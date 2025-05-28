@@ -68,7 +68,14 @@
                             @Html.DisplayFor(modelItem => item.StepOrder)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.AssignedUser.UserName)
+                            @if (item.AssignedUser != null)
+                            {
+                                @Html.DisplayFor(modelItem => item.AssignedUser.UserName)
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not Assigned</span>
+                            }
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.TimeLimitHours)

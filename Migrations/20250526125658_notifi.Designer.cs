@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Request.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250519154503_Updatehistory")]
-    partial class Updatehistory
+    [Migration("20250526125658_notifi")]
+    partial class notifi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -176,6 +176,48 @@ namespace Request.Migrations
                     b.ToTable("Departments");
                 });
 
+            modelBuilder.Entity("App.Models.IRequest.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("App.Models.IRequest.Priority", b =>
                 {
                     b.Property<int>("PriorityID")
@@ -216,8 +258,10 @@ namespace Request.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequestID"));
 
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("AssignedUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AttachmentURL")
@@ -231,14 +275,30 @@ namespace Request.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CurrentStepOrder")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
+                    b.Property<string>("IssueType")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LinkedIssues")
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<int?>("PriorityID")
                         .HasColumnType("int");
+
+                    b.Property<string>("Resolution")
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("StatusID")
                         .HasColumnType("int");
@@ -271,6 +331,37 @@ namespace Request.Migrations
                     b.HasIndex("WorkflowID");
 
                     b.ToTable("Requests");
+                });
+
+            modelBuilder.Entity("App.Models.IRequest.RequestApproval", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApprovedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("RequestId");
+
+                    b.ToTable("RequestApprovals");
                 });
 
             modelBuilder.Entity("App.Models.IRequest.RequestHistory", b =>
@@ -313,6 +404,39 @@ namespace Request.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("RequestHistories", (string)null);
+                });
+
+            modelBuilder.Entity("App.Models.IRequest.RequestStepHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ActionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RequestID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StepOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RequestStepHistory");
                 });
 
             modelBuilder.Entity("App.Models.IRequest.Status", b =>
@@ -386,7 +510,7 @@ namespace Request.Migrations
                     b.Property<string>("AssignedUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("RoleId")
+                    b.Property<string>("RequiredRoleId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("StatusID")
@@ -410,7 +534,7 @@ namespace Request.Migrations
 
                     b.HasIndex("AssignedUserId");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RequiredRoleId");
 
                     b.HasIndex("StatusID");
 
@@ -610,13 +734,29 @@ namespace Request.Migrations
                     b.Navigation("AssignedUser");
                 });
 
+            modelBuilder.Entity("App.Models.IRequest.Notification", b =>
+                {
+                    b.HasOne("App.Models.IRequest.Request", "Request")
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("App.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Request");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("App.Models.IRequest.Request", b =>
                 {
                     b.HasOne("App.Models.AppUser", "AssignedUser")
                         .WithMany()
-                        .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AssignedUserId");
 
                     b.HasOne("App.Models.IRequest.Priority", "Priority")
                         .WithMany("Requests")
@@ -645,6 +785,25 @@ namespace Request.Migrations
                     b.Navigation("User");
 
                     b.Navigation("Workflow");
+                });
+
+            modelBuilder.Entity("App.Models.IRequest.RequestApproval", b =>
+                {
+                    b.HasOne("App.Models.AppUser", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("App.Models.IRequest.Request", "Request")
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("App.Models.IRequest.RequestHistory", b =>
@@ -689,9 +848,9 @@ namespace Request.Migrations
                         .WithMany()
                         .HasForeignKey("AssignedUserId");
 
-                    b.HasOne("Roles", "Role")
+                    b.HasOne("Roles", "RequiredRole")
                         .WithMany("WorkflowSteps")
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("RequiredRoleId");
 
                     b.HasOne("App.Models.IRequest.Status", "statsus")
                         .WithMany("WorkflowSteps")
@@ -703,7 +862,7 @@ namespace Request.Migrations
 
                     b.Navigation("AssignedUser");
 
-                    b.Navigation("Role");
+                    b.Navigation("RequiredRole");
 
                     b.Navigation("Workflow");
 

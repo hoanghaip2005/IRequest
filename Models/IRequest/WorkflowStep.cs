@@ -28,17 +28,17 @@ namespace App.Models.IRequest
         [Display(Name = "Người phụ trách")]
         public AppUser? AssignedUser { get; set; }
 
-        // [Display(Name = "Danh mục Roles")]
-        // public int? AssignedToRole { get; set; }
-        // [ForeignKey("AssignedToRole")]
-        // [Display(Name = "Tên danh mục Roles")]
-        public Roles? Role { get; set; }
+        [Display(Name = "Role được phép phê duyệt")]
+        public string? RequiredRoleId { get; set; }
+        [ForeignKey("RequiredRoleId")]
+        [Display(Name = "Role phê duyệt")]
+        public Roles? RequiredRole { get; set; }
+
         [Display(Name = "Thời gian xử lý")]
         public int? TimeLimitHours { get; set; }
         [Display(Name = "Có cần phê duyệt không")]
         public bool ApprovalRequired { get; set; } = false;
         
-        // public bool AutoNotify { get; set; } = false;
         [Display(Name = "Trạng thái tiếp theo")]
         public int? StatusID { get; set; }
         [ForeignKey("StatusID")]

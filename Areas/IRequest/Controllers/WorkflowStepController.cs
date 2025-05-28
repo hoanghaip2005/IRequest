@@ -8,36 +8,70 @@ using Microsoft.EntityFrameworkCore;
 using App.Models;
 using App.Models.IRequest;
 using Microsoft.AspNetCore.Authorization;
+using Request.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace Request.Areas.IRequest.Controllers
 {
     [Area("IRequest")]
-    [Route("workflowStep/[action]")]
+    [Route("workflow-step/[action]")]
     public class WorkflowStepController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWorkflowStepService _workflowStepService;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<WorkflowStepController> _logger;
 
-        public WorkflowStepController(AppDbContext context)
+        public WorkflowStepController(
+            AppDbContext context, 
+            IWorkflowStepService workflowStepService, 
+            UserManager<AppUser> userManager,
+            ILogger<WorkflowStepController> logger)
         {
             _context = context;
+            _workflowStepService = workflowStepService;
+            _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet("/workflowStep")]
         public async Task<IActionResult> Index(string searchString)
         {
-            var workflowSteps = _context.WorkflowSteps
-                .Include(w => w.statsus)
-                .Include(w => w.Workflow)
-                .Include(w => w.AssignedUser)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchString))
+            try
             {
-                workflowSteps = workflowSteps.Where(w => w.StepName.Contains(searchString) ||
-                                                         w.Workflow.WorkflowName.Contains(searchString));
-            }
+                _logger.LogInformation("Loading WorkflowSteps with AssignedUser data");
+                
+                var workflowSteps = _context.WorkflowSteps
+                    .Include(w => w.statsus)
+                    .Include(w => w.Workflow)
+                    .Include(w => w.RequiredRole)
+                    .Include(w => w.AssignedUser)
+                    .AsNoTracking()
+                    .AsQueryable();
 
-            return View(await workflowSteps.ToListAsync());
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    workflowSteps = workflowSteps.Where(w => w.StepName.Contains(searchString) ||
+                                                             w.Workflow.WorkflowName.Contains(searchString));
+                }
+
+                var result = await workflowSteps.ToListAsync();
+                
+                _logger.LogInformation($"Loaded {result.Count} WorkflowSteps");
+                foreach (var step in result)
+                {
+                    _logger.LogInformation($"StepID: {step.StepID}, StepName: {step.StepName}, AssignedUser: {step.AssignedUser?.UserName ?? "Not Assigned"}");
+                }
+
+                return View(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading WorkflowSteps");
+                throw;
+            }
         }
 
         [HttpGet("/workflowStep/details/{id?}")]
@@ -51,6 +85,7 @@ namespace Request.Areas.IRequest.Controllers
             var workflowStep = await _context.WorkflowSteps
                 .Include(w => w.statsus)
                 .Include(w => w.Workflow)
+                .Include(w => w.RequiredRole)
                 .Include(w => w.AssignedUser)
                 .FirstOrDefaultAsync(m => m.StepID == id);
             if (workflowStep == null)
@@ -73,13 +108,14 @@ namespace Request.Areas.IRequest.Controllers
 
             ViewData["WorkflowID"] = new SelectList(workflows, "WorkflowID", "WorkflowName");
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName");
-            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName");
+            ViewData["RequiredRoleId"] = new SelectList(_context.Roles, "Id", "Name");
+            ViewData["AssignedUserId"] = new SelectList(_userManager.Users, "Id", "UserName");
             return View();
         }
 
         [HttpPost("/workflowStep/create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("StepID,StepName,WorkflowID,StepOrder,AssignedUserId,TimeLimitHours,ApprovalRequired,StatusID")] WorkflowStep workflowStep)
+        public async Task<IActionResult> Create([Bind("StepID,StepName,WorkflowID,StepOrder,RequiredRoleId,TimeLimitHours,ApprovalRequired,StatusID,AssignedUserId")] WorkflowStep workflowStep)
         {
             if (ModelState.IsValid)
             {
@@ -94,7 +130,8 @@ namespace Request.Areas.IRequest.Controllers
                         .ToList();
                     ViewData["WorkflowID"] = new SelectList(workflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
                     ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-                    ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+                    ViewData["RequiredRoleId"] = new SelectList(_context.Roles, "Id", "Name", workflowStep.RequiredRoleId);
+                    ViewData["AssignedUserId"] = new SelectList(_userManager.Users, "Id", "UserName", workflowStep.AssignedUserId);
                     return View(workflowStep);
                 }
 
@@ -108,7 +145,8 @@ namespace Request.Areas.IRequest.Controllers
                 .ToList();
             ViewData["WorkflowID"] = new SelectList(activeWorkflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+            ViewData["RequiredRoleId"] = new SelectList(_context.Roles, "Id", "Name", workflowStep.RequiredRoleId);
+            ViewData["AssignedUserId"] = new SelectList(_userManager.Users, "Id", "UserName", workflowStep.AssignedUserId);
             return View(workflowStep);
         }
 
@@ -121,7 +159,9 @@ namespace Request.Areas.IRequest.Controllers
                 return NotFound();
             }
 
-            var workflowStep = await _context.WorkflowSteps.FindAsync(id);
+            var workflowStep = await _context.WorkflowSteps
+                .Include(w => w.AssignedUser)
+                .FirstOrDefaultAsync(w => w.StepID == id);
             if (workflowStep == null)
             {
                 return NotFound();
@@ -134,14 +174,15 @@ namespace Request.Areas.IRequest.Controllers
 
             ViewData["WorkflowID"] = new SelectList(activeWorkflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+            ViewData["RequiredRoleId"] = new SelectList(_context.Roles, "Id", "Name", workflowStep.RequiredRoleId);
+            ViewData["AssignedUserId"] = new SelectList(_userManager.Users, "Id", "UserName", workflowStep.AssignedUserId);
             return View(workflowStep);
         }
 
 
         [HttpPost("/workflowStep/edit/{id?}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("StepID,StepName,WorkflowID,StepOrder,AssignedUserId,TimeLimitHours,ApprovalRequired,StatusID")] WorkflowStep workflowStep)
+        public async Task<IActionResult> Edit(int id, [Bind("StepID,StepName,WorkflowID,StepOrder,RequiredRoleId,TimeLimitHours,ApprovalRequired,StatusID,AssignedUserId")] WorkflowStep workflowStep)
         {
             if (id != workflowStep.StepID)
             {
@@ -163,7 +204,8 @@ namespace Request.Areas.IRequest.Controllers
                             .ToList();
                         ViewData["WorkflowID"] = new SelectList(activeWorkflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
                         ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-                        ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+                        ViewData["RequiredRoleId"] = new SelectList(_context.Roles, "Id", "Name", workflowStep.RequiredRoleId);
+                        ViewData["AssignedUserId"] = new SelectList(_userManager.Users, "Id", "UserName", workflowStep.AssignedUserId);
                         return View(workflowStep);
                     }
 
@@ -189,7 +231,8 @@ namespace Request.Areas.IRequest.Controllers
                 .ToList();
             ViewData["WorkflowID"] = new SelectList(workflows, "WorkflowID", "WorkflowName", workflowStep.WorkflowID);
             ViewData["StatusID"] = new SelectList(_context.Status, "StatusID", "StatusName", workflowStep.StatusID);
-            ViewData["AssignedUserId"] = new SelectList(_context.Users, "Id", "UserName", workflowStep.AssignedUserId);
+            ViewData["RequiredRoleId"] = new SelectList(_context.Roles, "Id", "Name", workflowStep.RequiredRoleId);
+            ViewData["AssignedUserId"] = new SelectList(_userManager.Users, "Id", "UserName", workflowStep.AssignedUserId);
             return View(workflowStep);
         }
 
@@ -205,6 +248,7 @@ namespace Request.Areas.IRequest.Controllers
             var workflowStep = await _context.WorkflowSteps
                 .Include(w => w.statsus)
                 .Include(w => w.Workflow)
+                .Include(w => w.AssignedUser)
                 .FirstOrDefaultAsync(m => m.StepID == id);
             if (workflowStep == null)
             {
@@ -233,6 +277,31 @@ namespace Request.Areas.IRequest.Controllers
         private bool WorkflowStepExists(int id)
         {
             return _context.WorkflowSteps.Any(e => e.StepID == id);
+        }
+
+        [HttpPost("/workflowStep/process")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcessStep([FromBody] ProcessStepRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await _workflowStepService.ProcessStep(
+                request.RequestId,
+                request.StepId,
+                userId,
+                request.Action,
+                request.Note
+            );
+
+            if (!result)
+                return BadRequest("Không thể xử lý bước này");
+
+            return Ok(new { message = "Xử lý thành công" });
         }
     }
 }

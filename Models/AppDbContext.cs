@@ -103,6 +103,32 @@ namespace App.Models
                     .HasForeignKey(rh => rh.UserID)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // Configure RequestApproval relationships
+            modelBuilder.Entity<RequestApproval>(entity =>
+            {
+                entity.HasOne(ra => ra.Request)
+                    .WithMany()
+                    .HasForeignKey(ra => ra.RequestId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ra => ra.ApprovedByUser)
+                    .WithMany()
+                    .HasForeignKey(ra => ra.ApprovedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Request)
+                .WithMany()
+                .HasForeignKey(n => n.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
         // public DbSet<Contact> Contacts { get; set; } 
         public DbSet<App.Models.IRequest.Request> Requests { get; set; }
@@ -115,5 +141,8 @@ namespace App.Models
 
         public DbSet<Comment> Comments { get; set; }
         public DbSet<RequestHistory> RequestHistories { get; set; }
+        public DbSet<App.Models.IRequest.RequestStepHistory> RequestStepHistories { get; set; }
+        public DbSet<RequestApproval> RequestApprovals { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
     }
 }

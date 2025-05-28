@@ -256,6 +256,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUHJpb3JpdHlcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Completed.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxDb21wbGV0ZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -274,6 +278,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/MyTasks.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSVJlcXVlc3RcVmlld3NcUmVxdWVzdFxNeVRhc2tzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Workspace/C\#/Request/Areas/IRequest/Views/Request/ViewHome.cshtml]
@@ -362,6 +370,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Workspace/C\#/Request/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Workspace/C\#/Request/Views/LaptopRequest/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGFwdG9wUmVxdWVzdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Workspace/C\#/Request/Views/Shared/Error.cshtml]

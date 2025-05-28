@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Yêu cầu cấp laptop";
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <form id="createRequestForm">
+                <div class="form-group">
+                    <label for="employeeId">Mã nhân viên</label>
+                    <input type="text" class="form-control" id="employeeId" name="employeeId" required>
+                </div>
+                <div class="form-group">
+                    <label for="employeeName">Tên nhân viên</label>
+                    <input type="text" class="form-control" id="employeeName" name="employeeName" required>
+                </div>
+                <div class="form-group">
+                    <label for="department">Phòng ban</label>
+                    <input type="text" class="form-control" id="department" name="department" required>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Lý do</label>
+                    <textarea class="form-control" id="reason" name="reason" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="deviceType">Loại thiết bị</label>
+                    <input type="text" class="form-control" id="deviceType" name="deviceType" required>
+                </div>
+                <div class="form-group">
+                    <label for="deviceSpecs">Cấu hình</label>
+                    <textarea class="form-control" id="deviceSpecs" name="deviceSpecs" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="priorityId">Mức ưu tiên</label>
+                    <select class="form-control" id="priorityId" name="priorityId" required>
+                        <option value="1">Critical</option>
+                        <option value="2">High</option>
+                        <option value="3">Medium</option>
+                        <option value="4">Low</option>
+                        <option value="5">Trivial</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Gửi yêu cầu</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#createRequestForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var formData = {
+                    employeeId: $('#employeeId').val(),
+                    employeeName: $('#employeeName').val(),
+                    department: $('#department').val(),
+                    reason: $('#reason').val(),
+                    deviceType: $('#deviceType').val(),
+                    deviceSpecs: $('#deviceSpecs').val(),
+                    priorityId: $('#priorityId').val()
+                };
+
+                $.ajax({
+                    url: '@Url.Action("CreateRequest", "LaptopRequest")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Yêu cầu đã được tạo thành công!');
+                            $('#createRequestForm')[0].reset();
+                        } else {
+                            alert('Có lỗi xảy ra: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                    }
+                });
+            });
+        });
+    </script>
+} 

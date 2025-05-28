@@ -50,7 +50,7 @@ namespace App.Models.IRequest
         public AppUser? User { get; set; }
 
         [Display(Name = "Người được giao")]
-        public string AssignedUserId { get; set; }
+        public string? AssignedUserId { get; set; }
 
         [ForeignKey("AssignedUserId")]
         public AppUser? AssignedUser { get; set; }
@@ -62,8 +62,43 @@ namespace App.Models.IRequest
 
         public DateTime? ClosedAt { get; set; }
 
+        public DateTime? ApprovedAt { get; set; }
+
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<RequestHistory> Histories { get; set; } = new HashSet<RequestHistory>();
+
+        public int CurrentStepOrder { get; set; }
+
+        [Required]
+        public string RoleId { get; set; } = "default";
+
+        [NotMapped]
+        public string? NextAssignee { get; set; }
+
+        [NotMapped]
+        public string? NextStepName { get; set; } 
+
+        [NotMapped]
+        public int RemainingSteps { get; set; }
+
+        [Display(Name = "Resolution")]
+        [Column(TypeName = "nvarchar(100)")]
+        public string? Resolution { get; set; }
+
+        [Display(Name = "Linked Issues")]
+        [Column(TypeName = "nvarchar(255)")]
+        public string? LinkedIssues { get; set; }
+
+        [Display(Name = "Issue Type")]
+        [Column(TypeName = "nvarchar(50)")]
+        public string? IssueType { get; set; }
+
+        [Display(Name = "Additional Info Requested")]
+        public bool IsAdditionalInfoRequested { get; set; }
+
+        [Display(Name = "Additional Info Request")]
+        [Column(TypeName = "nvarchar(max)")]
+        public string? AdditionalInfoRequest { get; set; }
 
         public Request()
         {

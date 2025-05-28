@@ -6,6 +6,7 @@ using App.Services;
 using Request.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,7 +65,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login/";
-    options.LogoutPath = "/logout/";
+    options.LogoutPath = "/Account/LogOff";
     options.AccessDeniedPath = "/khongduoctruycap.html";
 });
 
@@ -100,6 +101,17 @@ builder.Services.AddAuthorization(options => {
 builder.Services.AddScoped<RequestHistoryService>();
 builder.Services.AddHostedService<RequestHistoryBackgroundService>();
 
+builder.Services.AddScoped<WorkflowService>();
+
+// Add WorkflowStepService
+builder.Services.AddScoped<Request.Services.IWorkflowStepService, Request.Services.WorkflowStepService>();
+
+// Add LaptopRequestService
+builder.Services.AddScoped<ILaptopRequestService, LaptopRequestService>();
+
+builder.Services.AddScoped<IWorkflowStepService, WorkflowStepService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 var app = builder.Build();
@@ -113,13 +125,32 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
-app.AppStatusCodePage(); // Tuy bien Error 400 - 499
 
-app.UseAuthentication(); // Xac thuc danh tinh
-app.UseAuthorization(); // Xac thuc quyen truy cap
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLower();
+    var publicPaths = new[] { "/login", "/register", "/account", "/identity", "/css", "/js", "/images", "/lib" };
+    
+    if (!context.User.Identity.IsAuthenticated && !publicPaths.Any(p => path.StartsWith(p)))
+    {
+        context.Response.Redirect("/login/");
+        return;
+    }
+    await next();
+});
+
+app.AppStatusCodePage();
 
 app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

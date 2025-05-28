@@ -53,7 +53,7 @@ namespace App.Areas.IRequest.Controllers
             if (ModelState.IsValid)
             {
                 comment.UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                comment.CreatedAt = DateTime.Now;
+                comment.CreatedAt = DateTime.UtcNow;
                 _context.Add(comment);
                 await _context.SaveChangesAsync();
                 // Sau khi thêm, chuyển về trang chi tiết request hoặc danh sách comment

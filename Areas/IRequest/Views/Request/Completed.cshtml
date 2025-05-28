@@ -1,0 +1,26 @@
+@model IEnumerable<App.Models.IRequest.Request>
+@{
+    ViewData["Title"] = "Danh sách yêu cầu đã hoàn thành";
+}
+<h2>@ViewData["Title"]</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Người tạo</th>
+            <th>Ngày hoàn thành</th>
+            <th>Trạng thái</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Title</td>
+            <td>@item.User?.UserName</td>
+            <td>@item.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@item.Status?.StatusName</td>
+        </tr>
+    }
+    </tbody>
+</table>

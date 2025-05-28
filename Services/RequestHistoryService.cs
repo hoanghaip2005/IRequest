@@ -20,7 +20,7 @@ namespace Request.Services
                 RequestID = requestId,
                 StepID = stepId,
                 UserID = userId,
-                StartTime = DateTime.Now,
+                StartTime = DateTime.UtcNow,
                 Status = "Pending"
             };
 
@@ -36,7 +36,7 @@ namespace Request.Services
 
             if (history != null)
             {
-                history.EndTime = DateTime.Now;
+                history.EndTime = DateTime.UtcNow;
                 history.Status = status;
                 history.Note = note;
                 await _context.SaveChangesAsync();
@@ -45,7 +45,7 @@ namespace Request.Services
 
         public async Task CheckOverdueRequests()
         {
-            var currentTime = DateTime.Now;
+            var currentTime = DateTime.UtcNow;
             var overdueRequests = await _context.RequestHistories
                 .Include(rh => rh.WorkflowStep)
                 .Where(rh => rh.EndTime == null && rh.Status == "Pending")

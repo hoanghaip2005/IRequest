@@ -15,6 +15,12 @@
     <style>
         .app-navbar {
             margin-bottom: 0 !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            background-color: #fff !important;
         }
 
         nav.bg-light {
@@ -40,63 +46,362 @@
             font-family: var(--ds-font-family-body, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif);
             font-size: 13px;
         }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+            padding-top: 56px !important;
+        }
+
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            background-color: #fff;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            box-shadow: 3px 0 5px rgba(0,0,0,0.05);
+        }
+
+        .container-fluid {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Notification Styles */
+        .notification-container {
+            position: relative;
+        }
+
+        .notification-bell {
+            background: none;
+            border: none;
+            position: relative;
+            padding: 8px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .notification-bell:hover {
+            color: #333;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-top: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        .notification-header {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background: #f0f7ff;
+        }
+
+        .notification-item .notification-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .notification-item .notification-time {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .notification-item .notification-content {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar Styles */
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3 app-navbar"
-            styles="background-color: #fff;">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item d-flex align-items-center ms-4 me-0">
-                            <a href="/" class="btn btn-light shadow-sm m-0 p-0 rounded-2">
-                                <img src="~/images/UMT/iRequest.png" alt="Logo" class="img-fluid rounded-2"
-                                    style="height: 40px !important;" />
-                            </a>
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
-                                IREQUEST SERVICE MANAGEMENT
-                            </a>
-                        </li>
-                    </ul>
-                    <a href="#" class="btn m-2">
-                        <i class="fa fa-solid fa-gear"></i>
-                    </a>
-                    <a href="#" class="btn m-2">
-                        <i class="fa fa-regular fa-bell"></i>
-                    </a>
-                    <partial name="_LoginPartial" />
-                    <partial name="_MenuManagePartial" />
-
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <div class="d-flex">
-        <partial name="_NavTask" />
-        <div class="container-fluid">
-            <main role="main" class="pb-3">
-                @if (TempData["StatusMessage"] != null)
-                {
-                    <div class="container mt-3">
-                        @await Html.PartialAsync("_AlertMessage")
+    @if (User.Identity.IsAuthenticated)
+    {
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3 app-navbar"
+                styles="background-color: #fff;">
+                <div class="container-fluid">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item d-flex align-items-center ms-4 me-0">
+                                <a href="/" class="btn btn-light shadow-sm m-0 p-0 rounded-2">
+                                    <img src="@Url.Content("~/images/UMT/iRequest.png")" alt="Logo" class="img-fluid rounded-2"
+                                        style="height: 40px !important;" />
+                                </a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                                    IREQUEST SERVICE MANAGEMENT
+                                </a>
+                            </li>
+                        </ul>
+                        <a href="#" class="btn m-2">
+                            <i class="fa fa-solid fa-gear"></i>
+                        </a>
+                        <!-- Notification Bell -->
+                        <div class="notification-container m-2">
+                            <button class="notification-bell" onclick="toggleNotificationDropdown()">
+                                <i class="fa fa-regular fa-bell"></i>
+                                <span class="notification-badge">0</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h6 class="mb-0">Thông báo</h6>
+                                    <button class="btn btn-link btn-sm" onclick="markAllAsRead()">Đánh dấu đã đọc</button>
+                                </div>
+                                <div class="notification-list">
+                                    <!-- Notifications will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        <partial name="_LoginPartial" />
                     </div>
-                }
-                @RenderBody()
-            </main>
-        </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    @{
+        var showSidebar = User.Identity.IsAuthenticated;
+    }
+    <div class="d-flex">
+        @if (showSidebar)
+        {
+            <partial name="_NavTask" />
+            <div class="main-content">
+                <main role="main" class="pb-3">
+                    @if (TempData["StatusMessage"] != null)
+                    {
+                        <div class="container mt-3">
+                            @await Html.PartialAsync("_AlertMessage")
+                        </div>
+                    }
+                    @RenderBody()
+                </main>
+            </div>
+        }
+        else
+        {
+            <div style="width:100%; margin-left:0;">
+                <main role="main" class="pb-3">
+                    @if (TempData["StatusMessage"] != null)
+                    {
+                        <div class="container mt-3">
+                            @await Html.PartialAsync("_AlertMessage")
+                        </div>
+                    }
+                    @RenderBody()
+                </main>
+            </div>
+        }
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+        // Notification System
+        let notifications = [];
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/request/get-notifications');
+                const data = await response.json();
+                
+                if (data.success) {
+                    notifications = data.notifications.map(n => ({
+                        ...n,
+                        read: false
+                    }));
+                    updateNotificationBadge();
+                    renderNotifications();
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        function toggleNotificationDropdown() {
+            const dropdown = document.querySelector('.notification-dropdown');
+            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
+                loadNotifications(); // Load notifications when opening dropdown
+            }
+        }
+
+        function handleNotificationClick(notificationId, requestId) {
+            // Mark as read
+            fetch('/request/mark-notification-as-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ notificationId: notificationId })
+            }).then(() => {
+                const notification = notifications.find(n => n.id === notificationId);
+                if (notification) {
+                    notification.read = true;
+                    updateNotificationBadge();
+                    renderNotifications();
+                }
+            });
+            
+            // Navigate to request details
+            window.location.href = `/request/details/${requestId}`;
+        }
+
+        function markAllAsRead() {
+            fetch('/request/mark-all-notifications-as-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            }).then(() => {
+                notifications.forEach(notification => notification.read = true);
+                updateNotificationBadge();
+                renderNotifications();
+            });
+        }
+
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const badge = document.querySelector('.notification-badge');
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? 'block' : 'none';
+        }
+
+        function renderNotifications() {
+            const list = document.querySelector('.notification-list');
+            if (notifications.length === 0) {
+                list.innerHTML = '<div class="notification-item"><div class="notification-content text-center text-muted">Không có thông báo</div></div>';
+                return;
+            }
+
+            list.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="handleNotificationClick(${notification.id}, ${notification.requestId})">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-time">${formatTime(new Date(notification.time))}</div>
+                    <div class="notification-content">${notification.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function formatTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Vừa xong';
+            if (diff < 3600000) return `${Math.floor(diff/60000)} phút trước`;
+            if (diff < 86400000) return `${Math.floor(diff/3600000)} giờ trước`;
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.notification-dropdown');
+            const bell = document.querySelector('.notification-bell');
+            if (!bell.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Load notifications periodically
+        setInterval(loadNotifications, 60000); // Check every minute
+        loadNotifications(); // Initial load
+        </script>
+    }
 </body>
 
 </html>

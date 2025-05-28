@@ -2,119 +2,328 @@
 
 @model RegisterViewModel
 @{
-    ViewData["Title"] = "Đăng ký tài khoản";
+    ViewData["Title"] = "Register";
 }
 
-<div class="row mt-xl-5">
-    <div class="container-fluid h-100">
-        <div class="row h-100">
-            <!-- Cột trái -->
-            <div class="col-sm-1">
-
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="text-center mb-4">
+                <img src="/images/UMT/iRequest.png" alt="Logo" class="login-logo" style="height: 60px; width: auto;" />
             </div>
-            <div class="col-sm-6 d-flex flex-column align-items-center justify-content-center">
-                <div class="mb-4">
-                    <img src="~/images/UMT/iRequest.png" alt="Logo" class="img-fluid"
-                        style="height: 70px !important;" />
-                </div>
-                <div class="text-center px-4">
-                    <h4>Welcome Back to iRequest</h4>
-                    <p class="mb-4">Enter your username and password to continue.</p>
-                </div>
-                <div class="w-50 px-4">
-                    <section>
-                        <form asp-controller="Account" asp-action="Register"
-                            asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal"
-                            role="form">
-                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                            <div class="form-group mb-4">
-                                <label asp-for="UserName" class=" control-label mb-2"></label>
-                                <div>
-                                    <input asp-for="UserName" class="form-control" />
-                                    <span asp-validation-for="UserName" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="Email" class=" control-label mb-2"></label>
-                                <div>
-                                    <input asp-for="Email" class="form-control" />
-                                    <span asp-validation-for="Email" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="Password" class=" control-label mb-2"></label>
-                                <div>
-                                    <input asp-for="Password" class="form-control" />
-                                    <span asp-validation-for="Password" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="form-group mb-4">
-                                <label asp-for="ConfirmPassword" class=" control-label mb-2"></label>
-                                <div>
-                                    <input asp-for="ConfirmPassword" class="form-control" />
-                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="form-group w-100 mb-3">
-                                <div>
-                                    <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
-                                </div>
-                            </div>
-                        </form>
-                    </section>
-                </div>
-                <div>
-                    <section>
-                        <h4 class="mb-4">Hoặc đăng nhập bằng tài khoản.</h4>
-                        @{
-                            var schemes = await SignInManager.GetExternalAuthenticationSchemesAsync();
-                            var loginProviders = schemes.ToList();
-                            if (loginProviders.Count == 0)
-                            {
-                                <div>
-                                    <p>
-                                        Ứng dụng chưa hỗ trợ đăng nhập từ tài khoản ngoài
-                                    </p>
-                                </div>
-                            }
-                            else
-                            {
-                                <form asp-controller="Account" asp-action="ExternalLogin"
-                                    asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal"
-                                    role="form">
-                                    <div class="row">
-                                        @foreach (var provider in loginProviders)
-                                        {
-                                            <div class="col-6 mb-2">
-                                                <button type="submit" class="btn btn-primary w-100" name="provider"
-                                                    value="@provider.Name"
-                                                    title="Log in using your @provider.Name account">@provider.Name</button>
-                                            </div>
-                                        }
-                                    </div>
-                                </form>
-                            }
-                        }
-                    </section>
-                </div>
+            <div class="text-center mb-4">
+                <h1 class="login-title">Create Account</h1>
+                <p class="login-subtitle">Fill in your information to create your account</p>
             </div>
-
-            <!-- Cột phải: Ảnh UMT -->
-            <div class="col-sm-4 d-flex align-items-center justify-content-center">
-                <img src="~/images/UMT/umt.jpg" alt="UMT" class="img-fluid w-100 h-100 rounded p-5 object-fit-cover"
-                    style="object-position: center; border-radius: 64px !important ;" />
-            </div>
-            <div class="col-sm-1    ">
-
-            </div>
+            
+            <form asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]"
+                method="post" class="form-horizontal" role="form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="form-group mb-4">
+                    <label asp-for="UserName" class="form-label">Username</label>
+                    <input asp-for="UserName" class="form-control" placeholder="Enter your username" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <div class="password-container">
+                        <input asp-for="Password" type="password" class="form-control password-input" placeholder="Enter your password" />
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                    <div class="password-container">
+                        <input asp-for="ConfirmPassword" type="password" class="form-control password-input" placeholder="Confirm your password" />
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <button type="submit" class="btn btn-login">Sign Up</button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="mb-0">Already have an account? 
+                        <a asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" class="register-link">
+                            Sign In
+                        </a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
+<style>
+    .login-page {
+        height: 100vh;
+        background: url('/images/UMT/umt.jpg') no-repeat center center fixed;
+        background-size: cover;
+        position: relative;
+        overflow: hidden;
+        animation: fadeIn 1s ease-out;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 400px;
+        padding: 15px;
+        position: relative;
+        z-index: 2;
+        animation: slideIn 0.5s ease-out;
+        margin: 0 auto;
+    }
+
+    .login-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .login-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .login-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        animation: fadeInUp 0.5s ease-out 0.2s;
+    }
+
+    .form-group {
+        animation: fadeInUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .form-control:hover {
+        background-color: #fff;
+        border-color: #80bdff;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        transform: translateY(-2px);
+        background-color: #fff;
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-login:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+
+    .btn-login:active {
+        transform: translateY(0);
+    }
+
+    .btn-login::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
+
+    .btn-login:hover::after {
+        animation: ripple 1s ease-out;
+    }
+
+    .register-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .register-link::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #007bff;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.3s ease;
+    }
+
+    .register-link:hover {
+        color: #0056b3;
+    }
+
+    .register-link:hover::after {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+
+    .password-container {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 5px;
+        border-radius: 50%;
+    }
+
+    .password-toggle:hover {
+        color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(20, 20);
+            opacity: 0;
+        }
+    }
+</style>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        function togglePassword() {
+            const passwordInputs = document.querySelectorAll('.password-input');
+            passwordInputs.forEach(input => {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                } else {
+                    input.type = 'password';
+                }
+            });
+        }
+    </script>
 }

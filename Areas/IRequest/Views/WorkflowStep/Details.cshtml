@@ -39,6 +39,12 @@
                     @Html.DisplayFor(model => model.StepOrder)
                 </dd>
                 <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.RequiredRole)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.RequiredRole.Name)
+                </dd>
+                <dt class="col-sm-4">
                     @Html.DisplayNameFor(model => model.AssignedUser)
                 </dt>
                 <dd class="col-sm-8">
@@ -66,7 +72,7 @@
         </div>
     </div>
     <div class="md-4 mx-4">
-        <a asp-action="Edit" asp-route-id="@Model?.StatusID" class="btn btn-primary">Edit</a> |
+        <a asp-action="Edit" asp-route-id="@Model.StepID" class="btn btn-primary">Edit</a> |
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
     </div>
 </div>

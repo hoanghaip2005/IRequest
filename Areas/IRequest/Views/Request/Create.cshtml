@@ -45,9 +45,9 @@
                     <label asp-for="StatusID" class="control-label mb-1"></label>
                     <select asp-for="StatusID" class ="form-control" asp-items="ViewBag.StatusID"></select>
                 </div>
-                <div class="form-group mb-4">
+                <div class="form-group mb-4" style="display:none;">
                     <label asp-for="PriorityID" class="control-label mb-1"></label>
-                    <select asp-for="PriorityID" class ="form-control" asp-items="ViewBag.PriorityID"></select>
+                    <select asp-for="PriorityID" class="form-control" asp-items="ViewBag.PriorityID"></select>
                 </div>
                 <div class="form-group mb-4">
                     <label asp-for="WorkflowID" class="control-label mb-1"></label>
@@ -126,7 +126,11 @@
                     <select asp-for="WorkflowID" class="form-control" asp-items="ViewBag.WorkflowID"></select>
                     <span asp-validation-for="WorkflowID" class="text-danger"></span>
                 </div>
-                @if (ViewBag.IsAdminOrMember != null && (bool)ViewBag.IsAdminOrMember)
+                <div class="form-group mb-4" style="display:none;">
+                    <label asp-for="PriorityID" class="control-label mb-1"></label>
+                    <select asp-for="PriorityID" class="form-control" asp-items="ViewBag.PriorityID"></select>
+                </div>
+                @* @if (ViewBag.IsAdminOrMember != null && (bool)ViewBag.IsAdminOrMember)
                 {
                     <div class="form-group mb-4">
                         <label asp-for="PriorityID" class="control-label mb-1"></label>
@@ -136,7 +140,7 @@
                         <label asp-for="StatusID" class="control-label mb-1"></label>
                         <select asp-for="StatusID" class="form-control" asp-items="ViewBag.StatusID"></select>
                     </div>
-                }
+                } *@
                 <div class="col-md-12 d-flex justify-content-start">
                     <button class="btn btn-primary mb-3" type="submit" value="Create">
                         Tạo mới
